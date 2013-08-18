@@ -1,0 +1,15 @@
+*~
+*.o
+*.exe
+moc_*
+.DS_Store
+License.html
+Readme.html
+qrc_swipl-win.cpp
+VERSION
+*.dmg
+template.dmg.bz2
+*.app
+Makefile
+build
+swipl-win

@@ -1,0 +1,25 @@
+#!/bin/sh
+
+# Verify the environment is safe for building this package.
+
+findexe()
+{ oldifs="$IFS"
+  IFS=:
+  for d in $PATH; do
+    if [ -x $d/$1 ]; then
+       IFS="$oldifs"
+       return 0
+    fi
+  done
+  IFS="$oldifs"
+  return 1
+}
+
+# We need to know whether or not Qt exists.  Now, we only
+# check for qmake.
+
+if findexe qmake; then
+  exit 0
+else
+  exit 1
+fi

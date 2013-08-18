@@ -1,0 +1,155 @@
+#!/bin/bash
+
+PATH=/Users/janw/bin:/Users/janw/qt5/bin:$PATH
+app=swipl-win.app
+swipl=/Users/janw/bin/swipl
+
+copy_files=true
+
+done=false
+while [ $done = false ]; do
+  case $1 in
+    --no-copy)
+      copy_files=false
+      shift
+      ;;
+    *)
+      done=true
+      ;;
+  esac
+done
+
+eval `$swipl --dump-runtime-variables`
+VMAJOR=$(($PLVERSION/10000))
+VMINOR=$(($PLVERSION%10000/100))
+VPATCH=$(($PLVERSION%100))
+
+echo $VMAJOR.$VMINOR.$VPATCH > VERSION
+
+if [ $copy_files = true ]; then
+  printf "Deploying Qt ..."
+  macdeployqt $app
+  printf "done\n"
+  printf "Copying $PLBASE ..."
+  rsync -a $PLBASE $app/Contents
+  printf "ok\n"
+fi
+
+abs_libswipl=$PLBASE/lib/$PLARCH/libswipl.dylib
+rel_lib=@executable_path/../swipl/lib/$PLARCH
+rel_libswipl=$rel_lib/libswipl.dylib
+
+echo old: $abs_libswipl
+echo new: $rel_libswipl
+
+cd $app/Contents
+if [ $(basename $PLBASE) != swipl ]; then
+  ln -s $(basename $PLBASE) swipl
+fi
+
+# Make SWI-Prolog find its home
+echo swipl > swipl.home
+
+# Install the tradional binaries too
+cp swipl/bin/$PLARCH/swipl* MacOS
+
+# Install icon and bundle meta-data
+cp ../../swipl.icns Resources
+cp ../../../../man/macosx/macosx.html Resources/swipl-macosx.html
+cp ../../../../man/macosx/License.html Resources/
+cp ../../../../man/macosx/SWIapp.html Resources/
+
+cat > Info.plist << _EOF_
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$VMAJOR.$VMINOR.$VPATCH</string>
+	<key>CFBundleIconFile</key>
+	<string>swipl</string>
+	<key>CFBundleDisplayName</key>
+	<string>SWI-Prolog</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleGetInfoString</key>
+	<string>Created by the SWI-Prolog project</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>LGPL</string>
+	<key>CFBundleSignature</key>
+	<string>swpl</string>
+	<key>CFAppleHelpAnchor</key>
+	<string>swipl-macosx.html</string>
+	<key>CFBundleExecutable</key>
+	<string>swipl-win</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.swi-prolog.swipl-win</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+	<dict>
+	  <key>CFBundleTypeExtensions</key>
+	  <array>
+	  <string>pl</string>
+	  <string>prolog</string>
+	  </array>
+	  <key>CFBundleTypeName</key>
+	  <string>Prolog source</string>
+	  <key>CFBundleTypeIconFile</key>
+	  <string>swipl</string>
+	  <key>CFBundleTypeRole</key>
+	  <string>Shell</string>
+	  <key>LSHandlerRank</key>
+          <string>Default</string>
+	</dict>
+	</array>
+</dict>
+</plist>
+_EOF_
+
+
+printf "Fixing path to libswipl.dylib "
+for f in MacOS/* swipl/bin/$PLARCH/* swipl/lib/$PLARCH/*; do
+  case "$(file $f)" in
+    *Mach-O*)
+      old_libswipl=$(otool -L $f | grep libswipl.dylib | awk '{print $1}')
+      if [ ! -z "$old_libswipl" -a $(basename $f) != libswipl.dylib ]; then
+        printf "."
+        install_name_tool -change $old_libswipl $rel_libswipl $f
+      fi
+      ;;
+    *)
+      #printf "Skipped $f: $(file $f)\n"
+  esac
+done
+printf 'ok\n'
+
+# Getting dependencies from the Macport project into the bundle.
+# Note that we could consider turning these into a Macports framework.
+
+printf "Adding Macport dylibs to the bundle\n"
+for f in swipl/lib/$PLARCH/*; do
+  case "$(file $f)" in
+    *Mach-O*)
+      opt_dep=$(otool -L $f | grep /opt/local | awk '{print $1}')
+      if [ ! -z "$opt_dep" ]; then
+        change=""
+        for dep in $opt_dep; do
+	  printf "   Adding $dep ... "
+          cp $dep swipl/lib/$PLARCH
+	  chmod 755 swipl/lib/$PLARCH/$(basename $dep)
+          printf 'ok\n'
+	  change="$change -change $dep $rel_lib/$(basename $dep)"
+	done
+        install_name_tool $change $f
+      fi
+      ;;
+    *)
+  esac
+done
+
+
+# final naming.  Hack
+cd ../..
+mv $app SWI-Prolog.app

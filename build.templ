@@ -1,0 +1,7 @@
+#!/bin/bash
+
+PATH=/Users/janw/bin:/Users/janw/qt5/bin:$PATH
+export PKG_CONFIG_PATH=/Users/janw/lib/pkgconfig
+
+qmake
+make "$@"

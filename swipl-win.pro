@@ -55,17 +55,15 @@ mingw {
 }
 
 SOURCES += main.cpp \
-    ../pqConsole/SwiPrologEngine.cpp \
-    ../pqConsole/Swipl_IO.cpp \
-    ../pqConsole/Preferences.cpp \
-    ../pqConsole/pqMainWindow.cpp \
-    ../pqConsole/pqConsole.cpp \
-    ../pqConsole/FlushOutputEvents.cpp \
-    ../pqConsole/ConsoleEdit.cpp \
-    ../pqConsole/Completion.cpp \
+    SwiPrologEngine.cpp \
+    Swipl_IO.cpp \
+    Preferences.cpp \
+    pqMainWindow.cpp \
+    pqConsole.cpp \
+    FlushOutputEvents.cpp \
+    ConsoleEdit.cpp \
+    Completion.cpp \
     swipl_win.cpp
-
-INCLUDEPATH += $$PWD/../pqConsole
 
 RESOURCES += \
     swipl-win.qrc
@@ -76,15 +74,15 @@ OTHER_FILES += \
     MINGW.md
 
 HEADERS += \
-    ../pqConsole/SwiPrologEngine.h \
-    ../pqConsole/Swipl_IO.h \
-    ../pqConsole/Preferences.h \
-    ../pqConsole/PREDICATE.h \
-    ../pqConsole/pqMainWindow.h \
-    ../pqConsole/pqConsole_global.h \
-    ../pqConsole/pqConsole.h \
-    ../pqConsole/FlushOutputEvents.h \
-    ../pqConsole/do_events.h \
-    ../pqConsole/ConsoleEdit.h \
-    ../pqConsole/Completion.h \
+    SwiPrologEngine.h \
+    Swipl_IO.h \
+    Preferences.h \
+    PREDICATE.h \
+    pqMainWindow.h \
+    pqConsole_global.h \
+    pqConsole.h \
+    FlushOutputEvents.h \
+    do_events.h \
+    ConsoleEdit.h \
+    Completion.h \
     swipl_win.h

@@ -57,7 +57,7 @@ SwiPrologEngine::~SwiPrologEngine() {
 /** check stream property
  */
 bool SwiPrologEngine::is_tty(const FlushOutputEvents *f) { Q_UNUSED(f)
-    qDebug() << CVP(Suser_input) << "tty" << (PL_ttymode(Suser_input) == PL_RAWTTY);
+ // qDebug() << CVP(Suser_input) << "tty" << (PL_ttymode(Suser_input) == PL_RAWTTY);
     return PL_ttymode(Suser_input) == PL_RAWTTY;
 }
 

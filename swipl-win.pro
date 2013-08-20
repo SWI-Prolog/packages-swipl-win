@@ -36,6 +36,10 @@ DEFINES += PL_SAFE_ARG_MACROS
 # TBD evaluate timing difference
 DEFINES += PQCONSOLE_NO_HTML
 
+# reactive interface
+# TBD as above
+DEFINES += PQCONSOLE_BROWSER
+
 unix {
     # because SWI-Prolog is built from source
     CONFIG += link_pkgconfig

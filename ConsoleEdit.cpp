@@ -50,6 +50,9 @@ static QColor ANSI2col(int c, bool highlight = false) { return Preferences::ANSI
 ConsoleEdit::ConsoleEdit(int argc, char **argv, QWidget *parent)
     : ConsoleEditBase(parent), io(0)
 {
+    // mandatory for QTextBrowser instances
+    setReadOnly(false);
+
     qApp->setWindowIcon(QIcon(":/swipl.png"));
 
     qRegisterMetaType<pfunc>("pfunc");
@@ -66,6 +69,9 @@ ConsoleEdit::ConsoleEdit(int argc, char **argv, QWidget *parent)
 
     // issue worker thread start
     eng->start(argc, argv);
+
+    // reactive console
+    connect(this, SIGNAL(anchorClicked(const QUrl &)), this, SLOT(anchorClicked(QUrl)));
 }
 
 void ConsoleEdit::add_thread(int id) {
@@ -342,7 +348,7 @@ void ConsoleEdit::keyPressEvent(QKeyEvent *event) {
  */
 void ConsoleEdit::mousePressEvent(QMouseEvent *e) {
     QTextCursor c = cursorForPosition(e->pos());
-    clickable_message_line(c, false);
+    //clickable_message_line(c, false);
     ConsoleEditBase::mousePressEvent(e);
 }
 
@@ -473,10 +479,28 @@ void ConsoleEdit::user_output(QString text) {
     }
 
     auto instext = [&](QString text) {
-        c.insertText(text, output_text_fmt);
+
+        int ltext;
+
+        static QRegExp jmsg("(ERROR|Warning):[ \t]*(([a-zA-Z]:)?[^:]+):([0-9]+)(:([0-9]+))?.*", Qt::CaseSensitive, QRegExp::RegExp2);
+        if (jmsg.exactMatch(text)) {
+            QStringList parts = jmsg.capturedTexts();
+            qDebug() << "file" << parts[2].trimmed() << "line" << parts[4].trimmed() << "char" << parts[6].trimmed();
+            auto edit = QString("'%1':%2").arg(parts[2].trimmed()).arg(parts[4].trimmed());
+            if (!parts[6].isEmpty())
+                edit += ":" + parts[6];
+            auto html = QString("<a style=\"jmsg\" href=\"system:edit(%1)\">%2</a><br>").arg(edit).arg(text);
+            c.movePosition(c.StartOfLine);
+            c.insertHtml(html);
+            c.movePosition(c.EndOfLine);
+        }
+        else
+            c.insertText(text, output_text_fmt);
+
         if (status == wait_input) {
-            promptPosition += text.length();
-            fixedPosition += text.length();
+            ltext = text.length();
+            promptPosition += ltext;
+            fixedPosition += ltext;
             ensureCursorVisible();
         }
     };
@@ -485,7 +509,9 @@ void ConsoleEdit::user_output(QString text) {
     int pos = text.indexOf('\e');
     if (pos >= 0) {
         int left = 0;
+
         static QRegExp eseq("\e\\[(?:(3([0-7]);([01])m)|(0m)|(1m;)|1;3([0-7])m|(1m)|(?:3([0-7])m))");
+
         forever {
             int pos1 = eseq.indexIn(text, pos);
             if (pos1 == -1)
@@ -604,7 +630,7 @@ bool ConsoleEdit::eventFilter(QObject *, QEvent *event) {
     if (event->type() == QEvent::MouseMove) {
         QTextCursor c = cursorForPosition(static_cast<QMouseEvent*>(event)->pos());
         set_cursor_tip(c);
-        clickable_message_line(c, true);
+        //clickable_message_line(c, true);
     }
     return false;
 }
@@ -641,14 +667,18 @@ void ConsoleEdit::onCursorPositionChanged() {
     set_cursor_tip(c);
     if (fixedPosition > c.position()) {
         viewport()->setCursor(Qt::OpenHandCursor);
-        clickable_message_line(c, true);
-    } else
+        setReadOnly(true);
+        //clickable_message_line(c, true);
+    } else {
+        setReadOnly(false);
         viewport()->setCursor(Qt::IBeamCursor);
+    }
 }
 
 /** check if line content is appropriate, then highlight or open editor on it
- */
 void ConsoleEdit::clickable_message_line(QTextCursor c, bool highlight) {
+
+    return;
 
     c.movePosition(c.StartOfLine);
 
@@ -691,6 +721,7 @@ void ConsoleEdit::clickable_message_line(QTextCursor c, bool highlight) {
         cposition = -1;
     }
 }
+*/
 
 /** setup tooltip info
  */
@@ -731,7 +762,6 @@ void ConsoleEdit::onConsoleMenuAction() {
                             PlCall(action.toStdWString().data());
                             for (int c = 0; c < 100; c++)
                                 do_events(10);
-
                         } catch(PlException e) {
                             qDebug() << CCP(e);
                         }
@@ -848,4 +878,11 @@ void ConsoleEdit::exec_sync::go() {
     }
     else
         go_ = t;
+}
+
+void ConsoleEdit::setSource(const QUrl &name) {
+    qDebug() << "setSource" << name;
+}
+void ConsoleEdit::anchorClicked(QUrl url) {
+    query_run(url.toString());
 }

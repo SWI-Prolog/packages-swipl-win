@@ -29,6 +29,9 @@
 #ifndef PQCONSOLE_NO_HTML
     #include <QTextEdit>
     typedef QTextEdit ConsoleEditBase;
+#elif PQCONSOLE_BROWSER
+    #include <QTextBrowser>
+    typedef QTextBrowser ConsoleEditBase;
 #else
     #include <QPlainTextEdit>
     typedef QPlainTextEdit ConsoleEditBase;
@@ -207,9 +210,12 @@ protected:
     void query_run(QString module, QString call);
 
     /** check if line content is appropriate, then highlight or open editor on it */
-    void clickable_message_line(QTextCursor c, bool highlight);
-    int cposition;
-    QTextCharFormat fposition;
+    //void clickable_message_line(QTextCursor c, bool highlight);
+    //int cposition;
+    //QTextCharFormat fposition;
+
+    /** sense URL */
+    virtual void setSource(const QUrl & name);
 
 public slots:
 
@@ -234,10 +240,13 @@ protected slots:
     void command_do();
 
     /** push completion request in current command line */
-    void insertCompletion(QString);
+    void insertCompletion(QString completion);
 
     /** when engine gracefully complete-... */
     void eng_completed();
+
+    /** handle HREF (simpler is query_run(Target) */
+    void anchorClicked(QUrl link);
 
 signals:
 

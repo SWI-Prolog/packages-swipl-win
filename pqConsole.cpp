@@ -512,83 +512,6 @@ PREDICATE(win_message_box, 2) {
 
     if (c) {
         QString Text = t2w(PL_A1);
-        /*
-        record_t r_options = PL_record(PL_A2);
-
-        int rc = FALSE;
-        ConsoleEdit::exec_sync s;
-        QString err;
-
-        c->exec_func([&]() {
-
-            PlFrame fr_;
-            PlTerm Options;
-            if (!PL_recorded(r_options, Options)) {
-                qDebug() << "!PL_recorded(r_options, options)";
-                return;
-            }
-
-            QMessageBox mbox(c);
-            mbox.setText(Text); // should as well become an option - will provide win_message_box/1
-
-            // scan options
-            double image_scale = 0;
-            int minsize_x = 0, minsize_y = 0;
-            QString image;
-
-            PlTerm Option;
-            for (PlTail t(Options); t.next(Option); )
-                if (Option.arity() == 1) {
-                    QString name = Option.name();
-                    if (name == "image")
-                        image = t2w(Option[1]);
-                    else if (name == "image_scale")
-                        image_scale = double(Option[1]);
-                    else if (name == "minsize_x")
-                        minsize_x = int(Option[1]);
-                    else if (name == "minsize_y")
-                        minsize_y = int(Option[1]);
-                    else if ((err = unify(name.toUtf8(), &mbox, Option)).count() > 0)
-                        return; // reflection at work !
-                }
-                else {
-                    err = c->tr("option %1 : invalid arity").arg(t2w(Option));
-                    return;
-                }
-
-            // get Image file, if required
-            QPixmap imfile;
-            if (!image.isEmpty()) {
-                if (!imfile.load(image)) {
-                    err = c->tr("icon file %1 not found").arg(image);
-                    return;
-                }
-                if (image_scale)
-                    imfile = imfile.scaled(imfile.size() * image_scale,
-                                           Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-            }
-
-            if (!imfile.isNull())
-                mbox.setIconPixmap(imfile);
-
-            if (minsize_x || minsize_y) {
-                auto horizontalSpacer = new QSpacerItem(minsize_x, minsize_y, QSizePolicy::Minimum, QSizePolicy::Expanding);
-                auto layout = qobject_cast<QGridLayout*>(mbox.layout());
-                layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
-            }
-
-            rc = mbox.exec() == mbox.Ok;
-            s.go();
-        });
-        s.stop();
-
-        PL_erase(r_options);
-
-        if (!err.isEmpty())
-            throw PlException(A(err));
-
-        return rc;
-        */
 
         QString Title = "swipl-win", Image;
         PlTerm Icon; //QMessageBox::Icon Icon = QMessageBox::NoIcon;
@@ -846,4 +769,76 @@ PREDICATE0(paste) {
         return TRUE;
     }
     return FALSE;
+}
+
+#undef PROLOG_MODULE
+#define PROLOG_MODULE "system"
+
+/** win_preference_groups(-Groups:list)
+ */
+PREDICATE(win_preference_groups, 1) {
+    Preferences p;
+    PlTail l(PL_A1);
+    foreach (auto g, p.childGroups())
+        l.append(A(g));
+    l.close();
+    return TRUE;
+}
+
+/** win_preference_keys(+Group, -Keys:list)
+ */
+PREDICATE(win_preference_keys, 2) {
+    Preferences p;
+    PlTail l(PL_A1);
+    foreach (auto k, p.childKeys())
+        l.append(A(k));
+    l.close();
+    return TRUE;
+}
+
+/** win_current_preference(+Group, +Key, -Value)
+ */
+PREDICATE(win_current_preference, 3) {
+    Preferences p;
+
+    auto g = t2w(PL_A1),
+         k = t2w(PL_A2);
+
+    p.beginGroup(g);
+    auto x = p.value(k);
+
+    switch (x.type()) { bool ok;
+    case x.String:
+        return PL_A3 = A(x.toString());
+    case x.Int:
+        return PL_A3 = (long)x.toInt(&ok) && ok;
+    case x.Double:
+        return PL_A3 = x.toDouble(&ok) && ok;
+    default:
+        break;
+    }
+    throw PlException(A(QString("%1/%2: unknown x.type()").arg(g).arg(k)));
+}
+
+/** win_set_preference(+Group, +Key, +Value)
+ */
+PREDICATE(win_set_preference, 3) {
+    Preferences p;
+
+    auto g = t2w(PL_A1),
+         k = t2w(PL_A2);
+
+    p.beginGroup(g);
+    switch (PL_A3.type()) {
+    case PL_ATOM:
+        p.setValue(k, t2w(PL_A3));
+        return TRUE;
+    case PL_INTEGER:
+        p.setValue(k, int(PL_A3));
+        return TRUE;
+    case PL_FLOAT:
+        p.setValue(k, double(PL_A3));
+        return TRUE;
+    }
+    throw PlException(A(QString("%1/%2 - unknown PL type()").arg(g).arg(k)));
 }

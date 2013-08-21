@@ -226,7 +226,7 @@ void ConsoleEdit::keyPressEvent(QKeyEvent *event) {
         break;
 
     case Key_Backspace:
-        accept = editable;
+	accept = (cp > fixedPosition);
         break;
 
     case Key_Up:

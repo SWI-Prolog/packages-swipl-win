@@ -71,7 +71,7 @@ ConsoleEdit::ConsoleEdit(int argc, char **argv, QWidget *parent)
     eng->start(argc, argv);
 
     // reactive console
-    connect(this, SIGNAL(anchorClicked(const QUrl &)), this, SLOT(anchorClicked(QUrl)));
+    connect(this, SIGNAL(anchorClicked(const QUrl &)), this, SLOT(anchorClicked(const QUrl &)));
 }
 
 void ConsoleEdit::add_thread(int id) {
@@ -745,32 +745,31 @@ void ConsoleEdit::onConsoleMenuAction() {
     auto a = qobject_cast<QAction *>(sender());
     if (a) {
         QString action = a->toolTip();
-
-        if (auto w = find_parent<pqMainWindow>(this)) {
-            if (ConsoleEdit *target = w->consoleActive()) {
-
-                qDebug() << action << target->status << QTime::currentTime();
-
-                if (target->status == running) {
-
-                    {   SwiPrologEngine::in_thread e;
-                        int t = PL_thread_self();
-                        Q_ASSERT(!target->thids.contains(t));
-                        target->thids.append(t);
-                        try {
-                            PL_set_prolog_flag("console_thread", PL_INTEGER, t);
-                            PlCall(action.toStdWString().data());
-                            for (int c = 0; c < 100; c++)
-                                do_events(10);
-                        } catch(PlException e) {
-                            qDebug() << CCP(e);
-                        }
-                        target->thids.removeLast();
+        onConsoleMenuActionMap(action);
+    }
+}
+void ConsoleEdit::onConsoleMenuActionMap(QString action) {
+    if (auto w = find_parent<pqMainWindow>(this)) {
+        if (ConsoleEdit *target = w->consoleActive()) {
+            qDebug() << action << target->status << QTime::currentTime();
+            if (target->status == running) {
+                {   SwiPrologEngine::in_thread e;
+                    int t = PL_thread_self();
+                    Q_ASSERT(!target->thids.contains(t));
+                    target->thids.append(t);
+                    try {
+                        PL_set_prolog_flag("console_thread", PL_INTEGER, t);
+                        PlCall(action.toStdWString().data());
+                        for (int c = 0; c < 100; c++)
+                            do_events(10);
+                    } catch(PlException e) {
+                        qDebug() << CCP(e);
                     }
-                    return;
+                    target->thids.removeLast();
                 }
-                target->query_run("notrace("+action+")");
+                return;
             }
+            target->query_run("notrace("+action+")");
         }
     }
 }
@@ -883,6 +882,6 @@ void ConsoleEdit::exec_sync::go() {
 void ConsoleEdit::setSource(const QUrl &name) {
     qDebug() << "setSource" << name;
 }
-void ConsoleEdit::anchorClicked(QUrl url) {
+void ConsoleEdit::anchorClicked(const QUrl &url) {
     query_run(url.toString());
 }

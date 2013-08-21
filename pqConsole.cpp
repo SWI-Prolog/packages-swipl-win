@@ -354,7 +354,7 @@ PREDICATE(win_insert_menu_item, 4) {
         ctxtmod = "win_menu";
 
         ce->exec_func([=]() {
-            if (auto mw = qobject_cast<QMainWindow*>(ce->parentWidget())) {
+            if (auto mw = qobject_cast<pqMainWindow*>(ce->parentWidget())) {
                 foreach (QAction *ac, mw->menuBar()->actions())
                     if (ac->text() == Pulldown) {
                         QMenu *mn = ac->menu();
@@ -362,10 +362,8 @@ PREDICATE(win_insert_menu_item, 4) {
                             foreach (QAction *cm, mn->actions())
                                 if (cm->text() == Label) {
                                     cm->setMenu(new QMenu(Label));
-                                    foreach (auto p, lab_act) {
-                                        QAction *a = cm->menu()->addAction(p.first, ce, SLOT(onConsoleMenuAction()));
-                                        a->setToolTip(p.second);
-                                    }
+                                    foreach (auto p, lab_act)
+                                        mw->addActionPq(ce, cm->menu(), p.first, p.second);
                                     return;
                                 }
                             return;

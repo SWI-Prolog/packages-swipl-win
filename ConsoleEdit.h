@@ -117,6 +117,9 @@ public:
     /** the user identifying label is attached somewhere to parents chain */
     QString titleLabel();
 
+    /** route menu / action */
+    void addActionPq(QMenu *cmmenu, QString label, QString action);
+
 protected:
 
     /** host actual interface object, running in background */
@@ -224,6 +227,7 @@ public slots:
 
     /** serve console menus */
     void onConsoleMenuAction();
+    void onConsoleMenuActionMap(QString action);
 
     /** 2. attempt to run generic code inter threads */
     void run_function(pfunc f) { f(); }
@@ -246,7 +250,7 @@ protected slots:
     void eng_completed();
 
     /** handle HREF (simpler is query_run(Target) */
-    void anchorClicked(QUrl link);
+    void anchorClicked(const QUrl &link);
 
 signals:
 
@@ -255,9 +259,6 @@ signals:
 
     /** 3. attempt to run generic code inter threads */
     void sig_run_function(pfunc f);
-
-    /** 3. attempt to run generic code inter threads */
-    void sig_run_function_io(pfunc f);
 };
 
 #endif

@@ -27,6 +27,7 @@
 #include <QMainWindow>
 #include <QTabWidget>
 #include <QCloseEvent>
+#include <QSignalMapper>
 
 // forward declaration, avoid including all SWI-Prolog interface...
 class ConsoleEdit;
@@ -65,6 +66,9 @@ public:
     /** remove a console (NEVER the first) */
     void remConsole(ConsoleEdit *console);
 
+    /** bind to menu */
+    void addActionPq(ConsoleEdit *ce, QMenu *cmmenu, QString label, QString action);
+
 signals:
     
 public slots:
@@ -79,6 +83,9 @@ protected:
 
     /** when there are more than a console, use a tabbed interface */
     QTabWidget *consoles() const;
+
+    /** route menus to prolog */
+    QSignalMapper *menu2pl;
 };
 
 /** utility to lookup a typed parent in hierarchy */

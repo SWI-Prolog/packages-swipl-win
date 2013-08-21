@@ -26,6 +26,7 @@
 #include "PREDICATE.h"
 #include "do_events.h"
 
+#include <QMenu>
 #include <QDebug>
 #include <QTimer>
 #include <QMessageBox>
@@ -34,7 +35,7 @@
 inline ConsoleEdit *wid2con(QWidget *w) { return qobject_cast<ConsoleEdit*>(w); }
 
 pqMainWindow::pqMainWindow(QWidget *parent) :
-    QMainWindow(parent)
+    QMainWindow(parent), menu2pl(0)
 {
 }
 
@@ -42,6 +43,10 @@ pqMainWindow::pqMainWindow(QWidget *parent) :
  *  and proper XPCE termination
  */
 pqMainWindow::pqMainWindow(int argc, char *argv[]) {
+
+    // dispatch signals indexed
+    menu2pl = new QSignalMapper(this);
+
     setCentralWidget(new ConsoleEdit(argc, argv));
 
     Preferences p;
@@ -157,4 +162,10 @@ void pqMainWindow::remConsole(ConsoleEdit *c) {
     if (auto t = consoles())
         if (t->indexOf(c) > 0)
             t->removeTab(t->indexOf(c));
+}
+
+void pqMainWindow::addActionPq(ConsoleEdit *ce, QMenu *cmmenu, QString label, QString action) {
+    QAction *a = cmmenu->addAction(label, menu2pl, SLOT(map()));
+    menu2pl->setMapping(a, action);
+    connect(menu2pl, SIGNAL(mapped(const QString &)), ce, SLOT(onConsoleMenuActionMap(QString)));
 }

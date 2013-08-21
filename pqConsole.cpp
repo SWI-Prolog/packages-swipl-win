@@ -805,9 +805,12 @@ PREDICATE(win_current_preference, 3) {
          k = t2w(PL_A2);
 
     p.beginGroup(g);
-    auto x = p.value(k).toString();
+    if (p.contains(k)) {
+        auto x = p.value(k).toString();
+        return PL_A3 = PlCompound(x.toStdWString().data());
+    }
 
-    return PL_A3 = PlCompound(x.toStdWString().data());
+    return FALSE;
 }
 
 /** win_set_preference(+Group, +Key, +Value)

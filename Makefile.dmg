@@ -55,8 +55,10 @@ $(TEMPLATE_DMG).bz2:
 	@echo
 	@echo --------------------- Generating empty template --------------------
 	mkdir template
+	(cd template && ln -s /Applications)
+	(cd template && touch $(SOURCE_FILES))
 	hdiutil create -fs HFSX -layout SPUD -size 60m "$(TEMPLATE_DMG)" -srcfolder template -format UDRW -volname "$(NAME)" -quiet
-	rmdir template
+	rm -r template
 	bzip2 "$(TEMPLATE_DMG)"
 	@echo
 

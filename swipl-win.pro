@@ -75,7 +75,6 @@ RESOURCES += \
 
 OTHER_FILES += \
     README.md \
-    ../pqConsole/swipl.png \
     MINGW.md
 
 HEADERS += \

@@ -330,8 +330,24 @@ PREDICATE(win_insert_menu, 2) {
 PREDICATE(win_insert_menu_item, 4) {
 
     if (ConsoleEdit *ce = console_by_thread()) {
-        QString Pulldown = t2w(PL_A1), Label = t2w(PL_A2), Before = t2w(PL_A3), Goal = t2w(PL_A4);
-        //qDebug() << "win_insert_menu_item" << Pulldown << Label << Before << Goal;
+        QString Pulldown = t2w(PL_A1), Label, Before = t2w(PL_A3), Goal;
+        QList<QPair<QString, QString>> lab_act;
+
+        if (PL_A2.arity() == 2 /* &&
+            strcmp(PL_A2.name(), "/") == 0 &&
+            PL_A2[2].type() == PL_LIST &&
+            PL_A4.type() == PL_LIST */ )
+        {
+            Label = t2w(PL_A2[1]);
+            PlTail labels(PL_A2[2]), actions(PL_A4);
+            PlTerm label, action;
+            while (labels.next(label) && actions.next(action))
+                lab_act.append(qMakePair(t2w(label), t2w(action)));
+        }
+        else {
+            Label = t2w(PL_A2);
+            Goal = t2w(PL_A4);
+        }
 
         QString ctxtmod = t2w(PlAtom(PL_module_name(PL_context())));
         // if (PlCall("context_module", cx)) ctxtmod = t2w(cx); -- same as above: system
@@ -342,30 +358,44 @@ PREDICATE(win_insert_menu_item, 4) {
                 foreach (QAction *ac, mw->menuBar()->actions())
                     if (ac->text() == Pulldown) {
                         QMenu *mn = ac->menu();
-                        if (Label != "--")
-                            foreach (QAction *bc, ac->menu()->actions())
-                                if (bc->text() == Label) {
-                                    bc->setToolTip(Goal);
+                        if (!lab_act.isEmpty()) {
+                            foreach (QAction *cm, mn->actions())
+                                if (cm->text() == Label) {
+                                    cm->setMenu(new QMenu(Label));
+                                    foreach (auto p, lab_act) {
+                                        QAction *a = cm->menu()->addAction(p.first, ce, SLOT(onConsoleMenuAction()));
+                                        a->setToolTip(p.second);
+                                    }
                                     return;
                                 }
-                        if (Before == "-") {
-                            if (Label == "--")
-                                mn->addSeparator();
-                            else
-                                add_action(ce, mn, Label, ctxtmod, Goal);
                             return;
                         }
-                        foreach (QAction *bc, ac->menu()->actions())
-                            if (bc->text() == Before) {
+                        else {
+                            if (Label != "--")
+                                foreach (QAction *bc, mn->actions())
+                                    if (bc->text() == Label) {
+                                        bc->setToolTip(Goal);
+                                        return;
+                                    }
+                            if (Before == "-") {
                                 if (Label == "--")
-                                    mn->insertSeparator(bc);
+                                    mn->addSeparator();
                                 else
-                                    add_action(ce, mn, Label, ctxtmod, Goal, bc);
+                                    add_action(ce, mn, Label, ctxtmod, Goal);
                                 return;
                             }
+                            foreach (QAction *bc, mn->actions())
+                                if (bc->text() == Before) {
+                                    if (Label == "--")
+                                        mn->insertSeparator(bc);
+                                    else
+                                        add_action(ce, mn, Label, ctxtmod, Goal, bc);
+                                    return;
+                                }
 
-                        QAction *bc = add_action(ce, mn, Before, ctxtmod, "");
-                        add_action(ce, mn, Label, ctxtmod, Goal, bc);
+                            QAction *bc = add_action(ce, mn, Before, ctxtmod, "");
+                            add_action(ce, mn, Label, ctxtmod, Goal, bc);
+                        }
                     }
             }
         });

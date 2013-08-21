@@ -92,7 +92,7 @@ public:
     void exec_func(pfunc f) { emit sig_run_function(f); }
 
     /** 5. helper syncronization for modal loop */
-    struct exec_sync {
+    struct PQCONSOLESHARED_EXPORT exec_sync {
         exec_sync(int timeout_ms = 100);
 
         void stop();

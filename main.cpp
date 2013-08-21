@@ -113,3 +113,18 @@ int main(int argc, char *argv[]) {
     qDebug() << "main loop finished" << rc;
     return rc;
 }
+
+
+/* JW: Hack to compile swipl-win on MacOs 10.7 using g++ 4.8 while
+   avoiding linking to a new C++ shared object.
+*/
+
+#if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ < 1070
+namespace std {
+void __throw_bad_function_call()
+{ fprintf(stderr, "Bad function call\n");
+  exit(1);
+}
+}
+#endif
+

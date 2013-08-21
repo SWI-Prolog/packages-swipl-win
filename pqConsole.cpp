@@ -805,19 +805,9 @@ PREDICATE(win_current_preference, 3) {
          k = t2w(PL_A2);
 
     p.beginGroup(g);
-    auto x = p.value(k);
+    auto x = p.value(k).toString();
 
-    switch (x.type()) { bool ok;
-    case x.String:
-        return PL_A3 = A(x.toString());
-    case x.Int:
-        return PL_A3 = (long)x.toInt(&ok) && ok;
-    case x.Double:
-        return PL_A3 = x.toDouble(&ok) && ok;
-    default:
-        break;
-    }
-    throw PlException(A(QString("%1/%2: unknown x.type()").arg(g).arg(k)));
+    return PL_A3 = PlCompound(x.toStdWString().data());
 }
 
 /** win_set_preference(+Group, +Key, +Value)
@@ -829,16 +819,6 @@ PREDICATE(win_set_preference, 3) {
          k = t2w(PL_A2);
 
     p.beginGroup(g);
-    switch (PL_A3.type()) {
-    case PL_ATOM:
-        p.setValue(k, t2w(PL_A3));
-        return TRUE;
-    case PL_INTEGER:
-        p.setValue(k, int(PL_A3));
-        return TRUE;
-    case PL_FLOAT:
-        p.setValue(k, double(PL_A3));
-        return TRUE;
-    }
-    throw PlException(A(QString("%1/%2 - unknown PL type()").arg(g).arg(k)));
+    p.setValue(k, serialize(PL_A3));
+    return TRUE;
 }

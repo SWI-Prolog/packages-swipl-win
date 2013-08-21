@@ -49,6 +49,16 @@ inline QString t2w(PlTerm t) {
     return QString::fromWCharArray(WCP(t));
 }
 
+inline QString serialize(PlTerm t) {
+    wchar_t *s;
+
+    if ( PL_get_wchars(t, NULL, &s, CVT_WRITEQ|BUF_RING) )
+      return QString::fromWCharArray(s);
+
+    throw PlTypeError("text", t);
+    PL_THROWN(NULL);
+}
+
 typedef PlTerm T;
 typedef PlTermv V;
 typedef PlCompound C;

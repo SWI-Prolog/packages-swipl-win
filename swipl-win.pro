@@ -41,6 +41,9 @@ DEFINES += PQCONSOLE_NO_HTML
 # TBD as above
 DEFINES += PQCONSOLE_BROWSER
 
+# disable message hoovering and feedback, leave to reactive HTML
+DEFINES += PQCONSOLE_HANDLE_HOOVERING
+
 unix {
     # because SWI-Prolog is built from source
     CONFIG += link_pkgconfig

@@ -348,7 +348,7 @@ void ConsoleEdit::keyPressEvent(QKeyEvent *event) {
  */
 void ConsoleEdit::mousePressEvent(QMouseEvent *e) {
     QTextCursor c = cursorForPosition(e->pos());
-    //clickable_message_line(c, false);
+    clickable_message_line(c, false);
     ConsoleEditBase::mousePressEvent(e);
 }
 
@@ -481,7 +481,7 @@ void ConsoleEdit::user_output(QString text) {
     auto instext = [&](QString text) {
 
         int ltext;
-
+#ifndef PQCONSOLE_HANDLE_HOOVERING
         static QRegExp jmsg("(ERROR|Warning):[ \t]*(([a-zA-Z]:)?[^:]+):([0-9]+)(:([0-9]+))?.*", Qt::CaseSensitive, QRegExp::RegExp2);
         if (jmsg.exactMatch(text)) {
             QStringList parts = jmsg.capturedTexts();
@@ -495,6 +495,7 @@ void ConsoleEdit::user_output(QString text) {
             c.movePosition(c.EndOfLine);
         }
         else
+#endif
             c.insertText(text, output_text_fmt);
 
         if (status == wait_input) {
@@ -630,7 +631,7 @@ bool ConsoleEdit::eventFilter(QObject *, QEvent *event) {
     if (event->type() == QEvent::MouseMove) {
         QTextCursor c = cursorForPosition(static_cast<QMouseEvent*>(event)->pos());
         set_cursor_tip(c);
-        //clickable_message_line(c, true);
+        clickable_message_line(c, true);
     }
     return false;
 }
@@ -668,17 +669,24 @@ void ConsoleEdit::onCursorPositionChanged() {
     if (fixedPosition > c.position()) {
         viewport()->setCursor(Qt::OpenHandCursor);
         //setReadOnly(true);
-        //clickable_message_line(c, true);
+        clickable_message_line(c, true);
     } else {
         setReadOnly(false);
         viewport()->setCursor(Qt::IBeamCursor);
     }
 }
 
-/** check if line content is appropriate, then highlight or open editor on it
-void ConsoleEdit::clickable_message_line(QTextCursor c, bool highlight) {
+/** check if line content is appropriate, then highlight or open editor on it */
+#ifndef PQCONSOLE_HANDLE_HOOVERING
 
-    return;
+void ConsoleEdit::clickable_message_line(QTextCursor c, bool highlight) {
+    Q_UNUSED(c)
+    Q_UNUSED(highlight)
+}
+
+#else
+
+void ConsoleEdit::clickable_message_line(QTextCursor c, bool highlight) {
 
     c.movePosition(c.StartOfLine);
 
@@ -721,7 +729,7 @@ void ConsoleEdit::clickable_message_line(QTextCursor c, bool highlight) {
         cposition = -1;
     }
 }
-*/
+#endif
 
 /** setup tooltip info
  */

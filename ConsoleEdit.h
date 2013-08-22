@@ -212,10 +212,12 @@ protected:
     void query_run(QString call);
     void query_run(QString module, QString call);
 
+#ifdef PQCONSOLE_HANDLE_HOOVERING
     /** check if line content is appropriate, then highlight or open editor on it */
-    //void clickable_message_line(QTextCursor c, bool highlight);
-    //int cposition;
-    //QTextCharFormat fposition;
+    void clickable_message_line(QTextCursor c, bool highlight);
+    int cposition;
+    QTextCharFormat fposition;
+#endif
 
     /** sense URL */
     virtual void setSource(const QUrl & name);

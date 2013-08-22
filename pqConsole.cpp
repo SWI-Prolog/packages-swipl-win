@@ -283,18 +283,6 @@ PREDICATE0(win_has_menu) {
 /** MENU interface
  *  helper to lookup position and issue action creation
  */
-static QAction* add_action(ConsoleEdit *ce, QMenu *mn, QString Label, QString ctxtmod, QString Goal, QAction *before = 0) {
-    auto a = new QAction(mn);
-    a->setText(Label);
-    a->setToolTip(ctxtmod + ':' + Goal);  // use as spare storage for Module:Goal
-    QObject::connect(a, SIGNAL(triggered()), ce, SLOT(onConsoleMenuAction()));
-    if (before)
-        mn->insertAction(before, a);
-    else
-        mn->addAction(a);
-    return a;
-}
-
 /** win_insert_menu(+Label, +Before)
  *  do action construction
  */
@@ -379,7 +367,7 @@ PREDICATE(win_insert_menu_item, 4) {
                                 if (Label == "--")
                                     mn->addSeparator();
                                 else
-                                    add_action(ce, mn, Label, ctxtmod, Goal);
+                                    mw->add_action(ce, mn, Label, ctxtmod, Goal);
                                 return;
                             }
                             foreach (QAction *bc, mn->actions())
@@ -387,12 +375,12 @@ PREDICATE(win_insert_menu_item, 4) {
                                     if (Label == "--")
                                         mn->insertSeparator(bc);
                                     else
-                                        add_action(ce, mn, Label, ctxtmod, Goal, bc);
+                                        mw->add_action(ce, mn, Label, ctxtmod, Goal, bc);
                                     return;
                                 }
 
-                            QAction *bc = add_action(ce, mn, Before, ctxtmod, "");
-                            add_action(ce, mn, Label, ctxtmod, Goal, bc);
+                            QAction *bc = mw->add_action(ce, mn, Before, ctxtmod, "");
+                            mw->add_action(ce, mn, Label, ctxtmod, Goal, bc);
                         }
                     }
             }

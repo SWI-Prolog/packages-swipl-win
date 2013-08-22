@@ -227,7 +227,7 @@ public slots:
 
     /** serve console menus */
     void onConsoleMenuAction();
-    void onConsoleMenuActionMap(QString action);
+    void onConsoleMenuActionMap(const QString &action);
 
     /** 2. attempt to run generic code inter threads */
     void run_function(pfunc f) { f(); }

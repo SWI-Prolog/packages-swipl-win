@@ -485,7 +485,7 @@ void ConsoleEdit::user_output(QString text) {
         static QRegExp jmsg("(ERROR|Warning):[ \t]*(([a-zA-Z]:)?[^:]+):([0-9]+)(:([0-9]+))?.*", Qt::CaseSensitive, QRegExp::RegExp2);
         if (jmsg.exactMatch(text)) {
             QStringList parts = jmsg.capturedTexts();
-            qDebug() << "file" << parts[2].trimmed() << "line" << parts[4].trimmed() << "char" << parts[6].trimmed();
+            //qDebug() << "file" << parts[2].trimmed() << "line" << parts[4].trimmed() << "char" << parts[6].trimmed();
             auto edit = QString("'%1':%2").arg(parts[2].trimmed()).arg(parts[4].trimmed());
             if (!parts[6].isEmpty())
                 edit += ":" + parts[6];
@@ -748,7 +748,7 @@ void ConsoleEdit::onConsoleMenuAction() {
         onConsoleMenuActionMap(action);
     }
 }
-void ConsoleEdit::onConsoleMenuActionMap(QString action) {
+void ConsoleEdit::onConsoleMenuActionMap(const QString& action) {
     if (auto w = find_parent<pqMainWindow>(this)) {
         if (ConsoleEdit *target = w->consoleActive()) {
             qDebug() << action << target->status << QTime::currentTime();

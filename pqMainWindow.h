@@ -69,6 +69,9 @@ public:
     /** bind to menu */
     void addActionPq(ConsoleEdit *ce, QMenu *cmmenu, QString label, QString action);
 
+    /** ditto */
+    QAction* add_action(ConsoleEdit *ce, QMenu *mn, QString Label, QString ctxtmod, QString Goal, QAction *before = 0);
+
 signals:
     
 public slots:

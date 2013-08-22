@@ -45,7 +45,7 @@ pqMainWindow::pqMainWindow(QWidget *parent) :
 pqMainWindow::pqMainWindow(int argc, char *argv[]) {
 
     // dispatch signals indexed
-    menu2pl = new QSignalMapper(this);
+    menu2pl = new cSignalMapper;
 
     setCentralWidget(new ConsoleEdit(argc, argv));
 
@@ -167,19 +167,16 @@ void pqMainWindow::remConsole(ConsoleEdit *c) {
 /** handle menu dispatch by means of Qt signal mapper
  */
 void pqMainWindow::addActionPq(ConsoleEdit *ce, QMenu *cmmenu, QString label, QString action) {
-    /*
     QAction *a = cmmenu->addAction(label, menu2pl, SLOT(map()));
     menu2pl->setMapping(a, action);
-    connect(menu2pl, SIGNAL(mapped(const QString &)), ce, SLOT(onConsoleMenuActionMap(const QString &)));
-    */
-    QAction *a = cmmenu->addAction(label, ce, SLOT(onConsoleMenuAction()));
-    a->setToolTip(action);
+    if (0 == menu2pl->receivers(SIGNAL(mapped(const QString &))))
+        connect(menu2pl, SIGNAL(mapped(const QString &)), ce, SLOT(onConsoleMenuActionMap(const QString &)));
 }
 
 /** ditto
  */
 QAction* pqMainWindow::add_action(ConsoleEdit *ce, QMenu *mn, QString Label, QString ctxtmod, QString Goal, QAction *before) {
-    /*
+
     QAction *a;
     if (!before)
         a = mn->addAction(Label, menu2pl, SLOT(map()));
@@ -187,18 +184,10 @@ QAction* pqMainWindow::add_action(ConsoleEdit *ce, QMenu *mn, QString Label, QSt
         mn->insertAction(before, a = new QAction(Label, mn));
         connect(a, SIGNAL(triggered()), menu2pl, SLOT(map()));
     }
-
     menu2pl->setMapping(a, ctxtmod + ':' + Goal);
-    connect(menu2pl, SIGNAL(mapped(const QString &)), ce, SLOT(onConsoleMenuActionMap(QString)));
-    */
-    QAction *a;
-    if (!before)
-        a = mn->addAction(Label, ce, SLOT(onConsoleMenuAction()));
-    else {
-        mn->insertAction(before, a = new QAction(Label, mn));
-        connect(a, SIGNAL(triggered()), ce, SLOT(onConsoleMenuAction()));
-    }
-    a->setToolTip(ctxtmod + ':' + Goal);
+
+    if (0 == menu2pl->receivers(SIGNAL(mapped(const QString &))))
+        connect(menu2pl, SIGNAL(mapped(const QString &)), ce, SLOT(onConsoleMenuActionMap(QString)));
 
     return a;
 }

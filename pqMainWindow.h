@@ -32,6 +32,11 @@
 // forward declaration, avoid including all SWI-Prolog interface...
 class ConsoleEdit;
 
+/** must avoid multiple connections of menu target, then */
+struct cSignalMapper : QSignalMapper {
+    virtual int receivers(const char *signal) const { return QSignalMapper::receivers(signal); }
+};
+
 /** make a public top level widget
  *  ready to handle proper termination of XPCE thread
  */
@@ -88,7 +93,7 @@ protected:
     QTabWidget *consoles() const;
 
     /** route menus to prolog */
-    QSignalMapper *menu2pl;
+    cSignalMapper *menu2pl;
 };
 
 /** utility to lookup a typed parent in hierarchy */

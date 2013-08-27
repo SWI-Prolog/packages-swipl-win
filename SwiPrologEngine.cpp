@@ -237,6 +237,11 @@ void SwiPrologEngine::run() {
     spe = 0;
     */
 
+    {   PlTerm color_term;
+        if (PlCall("current_prolog_flag", PlTermv("color_term", color_term)) && color_term == "false")
+            target->color_term = false;
+    }
+
     for ( ; ; ) {
         int status = PL_toplevel() ? 0 : 1;
         qDebug() << "PL_halt" << status;

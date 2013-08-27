@@ -123,6 +123,9 @@ public:
     /** html_write */
     void html_write(QString html);
 
+    /** can be disabled from ~/.plrc */
+    static bool color_term;
+
 protected:
 
     /** host actual interface object, running in background */

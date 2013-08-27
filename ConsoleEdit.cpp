@@ -683,7 +683,7 @@ void ConsoleEdit::onCursorPositionChanged() {
     set_cursor_tip(c);
     if (fixedPosition > c.position()) {
         viewport()->setCursor(Qt::OpenHandCursor);
-        setReadOnly(true);
+        //setReadOnly(true);
         clickable_message_line(c, true);
     } else {
         setReadOnly(false);

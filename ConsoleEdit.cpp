@@ -481,7 +481,8 @@ void ConsoleEdit::user_output(QString text) {
     auto instext = [&](QString text) {
 
         int ltext;
-#ifndef PQCONSOLE_HANDLE_HOOVERING
+//#ifndef PQCONSOLE_HANDLE_HOOVERING
+#if 0
         static QRegExp jmsg("(ERROR|Warning):[ \t]*(([a-zA-Z]:)?[^:]+):([0-9]+)(:([0-9]+))?.*", Qt::CaseSensitive, QRegExp::RegExp2);
         if (jmsg.exactMatch(text)) {
             QStringList parts = jmsg.capturedTexts();
@@ -490,9 +491,9 @@ void ConsoleEdit::user_output(QString text) {
             if (!parts[6].isEmpty())
                 edit += ":" + parts[6];
             auto html = QString("<a style=\"jmsg\" href=\"system:edit(%1)\">%2</a><br>").arg(edit).arg(text);
-            c.movePosition(c.StartOfLine);
+            //c.movePosition(c.StartOfLine);
             c.insertHtml(html);
-            c.movePosition(c.EndOfLine);
+            //c.movePosition(c.EndOfLine);
         }
         else
 #endif
@@ -562,6 +563,8 @@ void ConsoleEdit::user_output(QString text) {
     }
     else
         instext(text);
+
+        //QString x = text();
 }
 
 bool ConsoleEdit::match_thread(int thread_id) const {
@@ -668,7 +671,7 @@ void ConsoleEdit::onCursorPositionChanged() {
     set_cursor_tip(c);
     if (fixedPosition > c.position()) {
         viewport()->setCursor(Qt::OpenHandCursor);
-        //setReadOnly(true);
+        setReadOnly(true);
         clickable_message_line(c, true);
     } else {
         setReadOnly(false);
@@ -892,4 +895,10 @@ void ConsoleEdit::setSource(const QUrl &name) {
 }
 void ConsoleEdit::anchorClicked(const QUrl &url) {
     query_run(url.toString());
+}
+
+void ConsoleEdit::html_write(QString html) {
+    auto c = textCursor();
+    c.movePosition(c.End);
+    c.insertHtml(html);
 }

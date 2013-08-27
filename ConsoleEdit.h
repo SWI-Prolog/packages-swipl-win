@@ -120,6 +120,9 @@ public:
     /** route menu / action */
     void addActionPq(QMenu *cmmenu, QString label, QString action);
 
+    /** html_write */
+    void html_write(QString html);
+
 protected:
 
     /** host actual interface object, running in background */
@@ -212,9 +215,9 @@ protected:
     void query_run(QString call);
     void query_run(QString module, QString call);
 
-#ifdef PQCONSOLE_HANDLE_HOOVERING
     /** check if line content is appropriate, then highlight or open editor on it */
     void clickable_message_line(QTextCursor c, bool highlight);
+#ifdef PQCONSOLE_HANDLE_HOOVERING
     int cposition;
     QTextCharFormat fposition;
 #endif

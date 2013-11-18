@@ -14,3 +14,5 @@ Makefile
 build
 swipl-win
 upload
+swipl.home
+Info.plist

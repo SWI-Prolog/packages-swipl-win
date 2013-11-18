@@ -1,8 +1,8 @@
 #!/bin/bash
 
-PATH=/Users/janw/bin:/Users/janw/qt5/bin:$PATH
+export PATH=$HOME/bin:$HOME/Qt5.1.1/5.1.1/clang_64/bin:$PATH
+swipl=$HOME/bin/swipl
 app=swipl-win.app
-swipl=/Users/janw/bin/swipl
 
 copy_files=true
 

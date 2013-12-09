@@ -152,4 +152,5 @@ done
 
 # final naming.  Hack
 cd ../..
+rm -rf SWI-Prolog.app
 mv $app SWI-Prolog.app

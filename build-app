@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export PATH=$HOME/bin:$HOME/Qt5.1.1/5.1.1/clang_64/bin:$PATH
-swipl=$HOME/bin/swipl
+export PATH=$HOME/stable/bin:$HOME/Qt5.1.1/5.1.1/clang_64/bin:$PATH
+swipl=$HOME/stable/bin/swipl
 app=swipl-win.app
 
 copy_files=true

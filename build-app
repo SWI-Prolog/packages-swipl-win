@@ -129,26 +129,36 @@ printf 'ok\n'
 # Note that we could consider turning these into a Macports framework.
 
 printf "Adding Macport dylibs to the bundle\n"
-for f in swipl/lib/$PLARCH/*; do
-  case "$(file $f)" in
-    *Mach-O*)
-      opt_dep=$(otool -L $f | grep /opt/local | awk '{print $1}')
-      if [ ! -z "$opt_dep" ]; then
-        change=""
-        for dep in $opt_dep; do
-	  printf "   Adding $dep ... "
-          cp $dep swipl/lib/$PLARCH
-	  chmod 755 swipl/lib/$PLARCH/$(basename $dep)
-          printf 'ok\n'
-	  change="$change -change $dep $rel_lib/$(basename $dep)"
-	done
-        install_name_tool $change $f
-      fi
-      ;;
-    *)
-  esac
+changeset="$(echo swipl/lib/$PLARCH/*)"
+while [ ! -z "$changeset" ]; do
+  newchanges=
+  for f in $changeset; do
+    case "$(file $f)" in
+      *Mach-O*)
+	opt_dep=$(otool -L $f | grep /opt/local | awk '{print $1}')
+	if [ ! -z "$opt_dep" ]; then
+	  change=""
+	  for dep in $opt_dep; do
+	    file="swipl/lib/$PLARCH/$(basename $dep)"
+	    if [ ! -f $file ]; then
+	      printf "   Adding $dep ... "
+	      cp $dep swipl/lib/$PLARCH
+	      chmod 755 $file
+	      newchanges="$newchanges $file"
+	      printf 'ok\n'
+            fi
+	    change="$change -change $dep $rel_lib/$(basename $dep)"
+	  done
+	  if [ ! -z "$change" ]; then
+	    install_name_tool $change $f
+	  fi
+	fi
+	;;
+      *)
+    esac
+  done
+  changeset="$newchanges"
 done
-
 
 # final naming.  Hack
 cd ../..

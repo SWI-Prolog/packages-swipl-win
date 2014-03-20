@@ -32,6 +32,7 @@ if [ $copy_files = true ]; then
   printf "done\n"
   printf "Copying $PLBASE ..."
   rsync -a $PLBASE $app/Contents
+  rm -rf $app/Contents/swipl/pack
   printf "ok\n"
 fi
 

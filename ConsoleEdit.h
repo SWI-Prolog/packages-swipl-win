@@ -260,6 +260,9 @@ protected slots:
     /** handle HREF (simpler is query_run(Target) */
     void anchorClicked(const QUrl &link);
 
+    /** highlight related 'symbols' on selection */
+    void selectionChanged();
+
 signals:
 
     /** issued to serve prompt */

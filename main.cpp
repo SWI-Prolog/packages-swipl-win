@@ -84,6 +84,10 @@ static void logger(QtMsgType type, const QMessageLogContext &context, const QStr
     case QtFatalMsg:
         fprintf(logfile, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         abort();
+        break;
+    case QtInfoMsg:
+        fprintf(logfile, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
     }
 
     fflush(logfile);

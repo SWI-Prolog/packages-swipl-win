@@ -21,13 +21,18 @@
 */
 
 #include <SWI-Stream.h>
+#include <signal.h>
+
 #include "Swipl_IO.h"
 #include "do_events.h"
 #include "PREDICATE.h"
 #include "Completion.h"
 #include "Preferences.h"
 #include "pqMainWindow.h"
-#include <signal.h>
+
+#include "blockSig.h"
+#include "ParenMatching.h"
+#include <QTextBlock>
 
 #include <QTime>
 #include <QRegExp>
@@ -149,6 +154,9 @@ void ConsoleEdit::setup() {
     connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(onCursorPositionChanged()));
 
     connect(this, SIGNAL(sig_run_function(pfunc)), this, SLOT(run_function(pfunc)));
+
+    // so far,
+    connect(this, SIGNAL(selectionChanged()), this, SLOT(selectionChanged()));
 }
 
 /** strict control on keyboard events required
@@ -913,4 +921,36 @@ void ConsoleEdit::html_write(QString html) {
     auto c = textCursor();
     c.movePosition(c.End);
     c.insertHtml(html);
+}
+
+void ConsoleEdit::selectionChanged()
+{
+    blockSig bs(this);
+
+    foreach (ExtraSelection s, extraSelections())
+        s.cursor.setCharFormat(s.format);
+    extraSelections().clear();
+
+    QTextCursor c = textCursor();
+    if (c.hasSelection()) {
+        QString csel = c.selectedText();
+        QList<ExtraSelection> lsel;
+        QTextCharFormat bold = ParenMatching::range::bold();
+
+        QTextCursor cfirst = cursorForPosition(QPoint(0, 0));
+        if (!cfirst.isNull()) {
+            while (c.block().position() > cfirst.block().position())
+                c.movePosition(c.Up);
+            c.movePosition(c.Up);
+            for ( ; ; ) {
+                c = document()->find(csel, c, QTextDocument::FindCaseSensitively);
+                if (c.isNull() || !c.block().isVisible())
+                    break;
+                lsel.append(ExtraSelection {c, c.blockCharFormat()});
+                c.setCharFormat(bold);
+            }
+        }
+
+        setExtraSelections(lsel);
+    }
 }

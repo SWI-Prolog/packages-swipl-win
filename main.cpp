@@ -85,9 +85,11 @@ static void logger(QtMsgType type, const QMessageLogContext &context, const QStr
         fprintf(logfile, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         abort();
         break;
+#if QT_VERSION >= 0x050500
     case QtInfoMsg:
         fprintf(logfile, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         break;
+#endif
     }
 
     fflush(logfile);

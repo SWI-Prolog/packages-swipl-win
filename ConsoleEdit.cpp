@@ -925,6 +925,14 @@ void ConsoleEdit::html_write(QString html) {
 
 void ConsoleEdit::selectionChanged()
 {
+    if (sel_check_timing.isValid()) {
+        if (sel_check_timing.elapsed() < 100)
+            return;
+        sel_check_timing.restart();
+    }
+    else
+        sel_check_timing.start();
+
     blockSig bs(this);
 
     foreach (ExtraSelection s, extraSelections())

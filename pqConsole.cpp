@@ -396,7 +396,20 @@ PREDICATE(win_insert_menu_item, 4) {
 PREDICATE0(tty_clear) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        c->tty_clear();
+
+        // loqt does better...
+        // pqConsole::gui_run([&]() { c->tty_clear(); });
+
+        ConsoleEdit::exec_sync s;
+        c->exec_func([&]() {
+            c->tty_clear();
+            s.go();
+        });
+        s.stop();
+
+        // buggy - need to sync
+        // c->tty_clear();
+
         return TRUE;
     }
     return FALSE;

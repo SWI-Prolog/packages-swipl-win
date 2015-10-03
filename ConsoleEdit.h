@@ -40,6 +40,8 @@
 #include "SwiPrologEngine.h"
 #include "Completion.h"
 
+#include <QElapsedTimer>
+
 class Swipl_IO;
 
 /** client side of command line interface
@@ -227,6 +229,9 @@ protected:
 
     /** sense URL */
     virtual void setSource(const QUrl & name);
+
+    /** relax selection check requirement */
+    QElapsedTimer sel_check_timing;
 
 public slots:
 

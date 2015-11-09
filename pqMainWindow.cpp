@@ -31,19 +31,22 @@
 #include <QTimer>
 #include <QMessageBox>
 #include <QApplication>
+#include <QMenuBar>
 
 inline ConsoleEdit *wid2con(QWidget *w) { return qobject_cast<ConsoleEdit*>(w); }
 
 pqMainWindow::pqMainWindow(QWidget *parent) :
     QMainWindow(parent), menu2pl(0)
-{
+{ QMenuBar *mb = menuBar();
+  mb->setNativeMenuBar(false);
 }
 
 /** this is the mandatory constructor to get SWI-prolog embedding
  *  and proper XPCE termination
  */
 pqMainWindow::pqMainWindow(int argc, char *argv[]) {
-
+    QMenuBar *mb = menuBar();
+    mb->setNativeMenuBar(false);
     // dispatch signals indexed
     menu2pl = new cSignalMapper;
 

@@ -21,6 +21,7 @@
 */
 
 #include "Preferences.h"
+#include <QDebug>
 
 QList<QColor> Preferences::ANSI_sequences;
 
@@ -70,7 +71,10 @@ Preferences::Preferences(QObject *parent) :
     beginReadArray("ANSI_sequences");
     for (int i = 0; i < 16; ++i) {
         setArrayIndex(i);
-        ANSI_sequences.append(value("color", v[i]).value<QColor>());
+        QColor c = value("color", v[i]).value<QColor>();
+	if ( !c.isValid() )	// Play safe if the color is invalid
+	    c = v[i];		// Happens on MacOSX 10.11 (El Captain)
+	ANSI_sequences.append(c);
     }
     endArray();
 }

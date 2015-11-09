@@ -740,6 +740,7 @@ PREDICATE0(select_ANSI_term_colors) {
         c->exec_func([&]() {
             Preferences p;
             QColorDialog d(c);
+	    d.setOption(QColorDialog::ColorDialogOption::DontUseNativeDialog);
             Q_ASSERT(d.customCount() >= p.ANSI_sequences.size());
             for (int i = 0; i < p.ANSI_sequences.size(); ++i)
                 d.setCustomColor(i, p.ANSI_sequences[i].rgb());

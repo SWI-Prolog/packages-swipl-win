@@ -36,17 +36,21 @@
 inline ConsoleEdit *wid2con(QWidget *w) { return qobject_cast<ConsoleEdit*>(w); }
 
 pqMainWindow::pqMainWindow(QWidget *parent) :
-    QMainWindow(parent), menu2pl(0)
-{ QMenuBar *mb = menuBar();
+    QMainWindow(parent), menu2pl(0) {
+#ifndef __APPLE__
+  QMenuBar *mb = menuBar();
   mb->setNativeMenuBar(false);
+#endif
 }
 
 /** this is the mandatory constructor to get SWI-prolog embedding
  *  and proper XPCE termination
  */
 pqMainWindow::pqMainWindow(int argc, char *argv[]) {
+#ifndef __APPLE__
     QMenuBar *mb = menuBar();
     mb->setNativeMenuBar(false);
+#endif
     // dispatch signals indexed
     menu2pl = new cSignalMapper;
 

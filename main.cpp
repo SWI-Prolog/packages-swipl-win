@@ -28,6 +28,7 @@
 #include "swipl_win.h"
 
 static FILE *logfile;
+static bool  nolog = true;
 
 #if QT_VERSION < 0x050000
 
@@ -62,8 +63,12 @@ static void logger(QtMsgType type, const char *msg)
 #else
 
 static QtMessageHandler previous;
-static void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+static void
+logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    if ( nolog )
+        return;
+
     if (!logfile) {
         if (previous)
             previous(type, context, msg);
@@ -105,14 +110,17 @@ static void logger(QtMsgType type, const QMessageLogContext &context, const QStr
 int main(int argc, char *argv[]) {
     const char *logname;
 
-    if ( (logname = getenv("SWIPL_LOGFILE")) ) {
-        logfile = fopen(logname, "w");
-#if QT_VERSION < 0x050000
-        previous = qInstallMsgHandler(logger);
-#else
-        previous = qInstallMessageHandler(logger);
-#endif
+    if ( (logname = getenv("QDEBUG")) ) {
+        nolog = false;
+        if ( strcmp(logname, "stderr") != 0 )
+	    logfile = fopen(logname, "w");
     }
+
+#if QT_VERSION < 0x050000
+    previous = qInstallMsgHandler(logger);
+#else
+    previous = qInstallMessageHandler(logger);
+#endif
 
     auto a = new swipl_win(argc, argv);
     int rc = a->exec();

@@ -3,8 +3,6 @@
 *.exe
 moc_*
 .DS_Store
-License.html
-Readme.html
 qrc_swipl-win.cpp
 VERSION
 *.dmg

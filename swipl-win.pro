@@ -18,7 +18,7 @@ macx {
     CONFIG += c++11
     ICON = swipl.icns
     QMAKE_MACOS_DEPLOYMENT_TARGET = 10.6
-    QMAKE_MAC_SDK = macosx10.11
+    QMAKE_MAC_SDK = macosx10.12
 }
 
 TARGET = swipl-win

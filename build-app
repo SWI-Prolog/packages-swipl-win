@@ -24,7 +24,13 @@ VMAJOR=$(($PLVERSION/10000))
 VMINOR=$(($PLVERSION%10000/100))
 VPATCH=$(($PLVERSION%100))
 
-echo $VMAJOR.$VMINOR.$VPATCH > VERSION
+version="$VMAJOR.$VMINOR.$VPATCH"
+
+if [ ! -z "$PLVERSIONTAG" ]; then
+  version="$version-$PLVERSIONTAG"
+fi
+
+echo "$version" > VERSION
 
 if [ $copy_files = true ]; then
   printf "Deploying Qt ..."
@@ -68,7 +74,7 @@ cat > Info.plist << _EOF_
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$VMAJOR.$VMINOR.$VPATCH</string>
+	<string>$version</string>
 	<key>CFBundleIconFile</key>
 	<string>swipl</string>
 	<key>CFBundleDisplayName</key>

@@ -2,7 +2,7 @@
 
     Author:        Carlo Capelli
     E-mail:        cc.carlo.cap@gmail.com
-    Copyright (c)  2013, Carlo Capelli
+    Copyright (c)  2015, 2014,2015
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -31,47 +31,27 @@
     POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "pqTerm.h"
-#include "PREDICATE.h"
+#ifndef BLOCKSIG_H
+#define BLOCKSIG_H
 
-QVariant term2variant(PlTerm t) {
-    switch (t.type()) {
-    case PL_VARIABLE:
-        return QVariant();
-    case PL_INT:
-    case PL_INTEGER:
-        return QVariant(int(t));
-    case PL_FLOAT:
-        return double(t);
+#include <QObject>
+#include <QPointer>
 
-    case PL_ATOM:
-    case PL_STRING:
-        return t2w(t);
+/** temporary stop signals communication
+ *  use with care: notably QTextEdit formatting can be lost
+ *  on multiple changes notification
+ */
+struct blockSig {
 
-    default:
-        throw QObject::tr("term2variant: unknown type %1").arg(t.type());
-    }
-}
+    blockSig(QObject* target) : target(target) { current = target->blockSignals(true); }
+    ~blockSig() { off(); }
 
-PlTerm variant2term(const QVariant& v) {
-    switch (v.type()) {
-    case v.Char:
-    case v.String:
-    case v.ByteArray:
-        return PlTerm(v.toString().toStdWString().data());
-    case v.Int:
-        return PlTerm(long(v.toInt()));
-    case v.Double:
-        return PlTerm(v.toDouble());
-    case v.List: {
-        PlTerm t;
-        PlTail l(t);
-        foreach(QVariant e, v.toList())
-            l.append(variant2term(e));
-        l.close();
-        return t;
-    }
-    default:
-        return PlTerm();
-    }
-}
+    void off() { if (target) { target->blockSignals(current); target = 0; } }
+
+private:
+
+    QPointer<QObject> target;
+    bool current;
+};
+
+#endif // BLOCKSIG_H

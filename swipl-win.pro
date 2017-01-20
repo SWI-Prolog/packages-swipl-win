@@ -18,6 +18,7 @@ macx {
     CONFIG += c++11
     ICON = swipl.icns
     QMAKE_MACOS_DEPLOYMENT_TARGET = 10.6
+    QMAKE_MAC_SDK = macosx10.12
 }
 
 TARGET = swipl-win
@@ -44,6 +45,10 @@ DEFINES += PQCONSOLE_BROWSER
 
 # disable message hoovering and feedback, leave to reactive HTML
 DEFINES += PQCONSOLE_HANDLE_HOOVERING
+
+# added code from https://github.com/CapelliC/loqt/tree/master/lqUty
+# to handle highlighting of selected text in console
+DEFINES += LQUTY_STATIC
 
 unix {
     # because SWI-Prolog is built from source
@@ -72,7 +77,8 @@ SOURCES += main.cpp \
     FlushOutputEvents.cpp \
     ConsoleEdit.cpp \
     Completion.cpp \
-    swipl_win.cpp
+    swipl_win.cpp \
+    ParenMatching.cpp
 
 RESOURCES += \
     swipl-win.qrc
@@ -93,4 +99,7 @@ HEADERS += \
     do_events.h \
     ConsoleEdit.h \
     Completion.h \
-    swipl_win.h
+    swipl_win.h \
+    blockSig.h \
+    lqUty_global.h \
+    ParenMatching.h

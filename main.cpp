@@ -1,23 +1,34 @@
-/*
-    pqConsole    : interfacing SWI-Prolog and Qt
+/*  Part of SWI-Prolog interface to Qt
 
-    Author       : Carlo Capelli
-    E-mail       : cc.carlo.cap@gmail.com
-    Copyright (C): 2013, Carlo Capelli
+    Author:        Carlo Capelli
+    E-mail:        cc.carlo.cap@gmail.com
+    Copyright (c)  2013-2015, Carlo Capelli
+    All rights reserved.
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in
+       the documentation and/or other materials provided with the
+       distribution.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+    COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <QApplication>
@@ -28,6 +39,7 @@
 #include "swipl_win.h"
 
 static FILE *logfile;
+static bool  nolog = true;
 
 #if QT_VERSION < 0x050000
 
@@ -62,8 +74,12 @@ static void logger(QtMsgType type, const char *msg)
 #else
 
 static QtMessageHandler previous;
-static void logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+static void
+logger(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    if ( nolog )
+        return;
+
     if (!logfile) {
         if (previous)
             previous(type, context, msg);
@@ -84,6 +100,12 @@ static void logger(QtMsgType type, const QMessageLogContext &context, const QStr
     case QtFatalMsg:
         fprintf(logfile, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
         abort();
+        break;
+#if QT_VERSION >= 0x050500
+    case QtInfoMsg:
+        fprintf(logfile, "Info: %s (%s:%u, %s)\n", localMsg.constData(), context.file, context.line, context.function);
+        break;
+#endif
     }
 
     fflush(logfile);
@@ -99,14 +121,17 @@ static void logger(QtMsgType type, const QMessageLogContext &context, const QStr
 int main(int argc, char *argv[]) {
     const char *logname;
 
-    if ( (logname = getenv("SWIPL_LOGFILE")) ) {
-        logfile = fopen(logname, "w");
-#if QT_VERSION < 0x050000
-        previous = qInstallMsgHandler(logger);
-#else
-        previous = qInstallMessageHandler(logger);
-#endif
+    if ( (logname = getenv("QDEBUG")) ) {
+        nolog = false;
+        if ( strcmp(logname, "stderr") != 0 )
+	    logfile = fopen(logname, "w");
     }
+
+#if QT_VERSION < 0x050000
+    previous = qInstallMsgHandler(logger);
+#else
+    previous = qInstallMessageHandler(logger);
+#endif
 
     auto a = new swipl_win(argc, argv);
     int rc = a->exec();

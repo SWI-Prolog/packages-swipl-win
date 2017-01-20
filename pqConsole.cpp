@@ -1,23 +1,34 @@
-/*
-    pqConsole    : interfacing SWI-Prolog and Qt
+/*  Part of SWI-Prolog interface to Qt
 
-    Author       : Carlo Capelli
-    E-mail       : cc.carlo.cap@gmail.com
-    Copyright (C): 2013, Carlo Capelli
+    Author:        Carlo Capelli
+    E-mail:        cc.carlo.cap@gmail.com
+    Copyright (c)  2013-2015, Carlo Capelli
+    All rights reserved.
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions
+    are met:
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+    1. Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+    2. Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in
+       the documentation and/or other materials provided with the
+       distribution.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+    COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+    POSSIBILITY OF SUCH DAMAGE.
 */
 
 // by now peek system namespace. Eventually, will move to pqConsole
@@ -396,7 +407,20 @@ PREDICATE(win_insert_menu_item, 4) {
 PREDICATE0(tty_clear) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        c->tty_clear();
+
+        // loqt does better...
+        // pqConsole::gui_run([&]() { c->tty_clear(); });
+
+        ConsoleEdit::exec_sync s;
+        c->exec_func([&]() {
+            c->tty_clear();
+            s.go();
+        });
+        s.stop();
+
+        // buggy - need to sync
+        // c->tty_clear();
+
         return TRUE;
     }
     return FALSE;
@@ -727,6 +751,7 @@ PREDICATE0(select_ANSI_term_colors) {
         c->exec_func([&]() {
             Preferences p;
             QColorDialog d(c);
+	    d.setOption(QColorDialog::ColorDialogOption::DontUseNativeDialog);
             Q_ASSERT(d.customCount() >= p.ANSI_sequences.size());
             for (int i = 0; i < p.ANSI_sequences.size(); ++i)
                 d.setCustomColor(i, p.ANSI_sequences[i].rgb());

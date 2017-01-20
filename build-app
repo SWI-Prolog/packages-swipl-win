@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PATH=$HOME/stable/bin:$HOME/Qt5.1.1/5.1.1/clang_64/bin:$PATH
+export PATH=$HOME/bin:$HOME/Qt5.5/5.5/clang_64/bin:$PATH
 swipl=$HOME/stable/bin/swipl
 app=swipl-win.app
 
@@ -24,7 +24,13 @@ VMAJOR=$(($PLVERSION/10000))
 VMINOR=$(($PLVERSION%10000/100))
 VPATCH=$(($PLVERSION%100))
 
-echo $VMAJOR.$VMINOR.$VPATCH > VERSION
+version="$VMAJOR.$VMINOR.$VPATCH"
+
+if [ ! -z "$PLVERSIONTAG" ]; then
+  version="$version-$PLVERSIONTAG"
+fi
+
+echo "$version" > VERSION
 
 if [ $copy_files = true ]; then
   printf "Deploying Qt ..."
@@ -68,7 +74,7 @@ cat > Info.plist << _EOF_
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$VMAJOR.$VMINOR.$VPATCH</string>
+	<string>$version</string>
 	<key>CFBundleIconFile</key>
 	<string>swipl</string>
 	<key>CFBundleDisplayName</key>

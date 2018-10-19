@@ -1,13 +1,16 @@
 cmake_minimum_required(VERSION 3.1.0)
-project(swipl-qtwin)
+project(swipl-swipl-win)
 
 include("../cmake/PrologPackage.cmake")
+include(Install)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5Widgets CONFIG REQUIRED)
+find_package(Qt5Widgets CONFIG)
+
+if(Qt5Widgets_FOUND)
 
 set(PLWIN_SRC main.cpp SwiPrologEngine.cpp Swipl_IO.cpp Preferences.cpp
     pqMainWindow.cpp pqConsole.cpp FlushOutputEvents.cpp ConsoleEdit.cpp
@@ -51,3 +54,14 @@ add_executable(swipl-win ${PLWIN_SRC})
 target_link_libraries(swipl-win libswipl Qt5::Widgets)
 target_compile_options(swipl-win PRIVATE ${QT_DEFINES})
 
+install(TARGETS swipl-win
+	RUNTIME DESTINATION ${SWIPL_INSTALL_ARCH_EXE})
+
+if(NOT WIN32)
+# Create symbolic link from public installation dir to executables
+install(DIRECTORY DESTINATION bin)
+ilink(${CMAKE_INSTALL_PREFIX}/${SWIPL_INSTALL_ARCH_EXE}/swipl-win
+      ${CMAKE_INSTALL_PREFIX}/bin/swipl-win)
+endif()
+
+endif(Qt5Widgets_FOUND)

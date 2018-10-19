@@ -432,7 +432,7 @@ PREDICATE0(tty_clear) {
  */
 PREDICATE(win_open_console, 5) {
 
-    qDebug() << "win_open_console" << CVP(CT);
+    qDebug() << "win_open_console" << CVP(QThread::currentThread());
 
     ConsoleEdit *ce = console_peek_first();
     if (!ce)

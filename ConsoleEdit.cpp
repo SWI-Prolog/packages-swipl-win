@@ -895,11 +895,11 @@ void ConsoleEdit::query_run(QString module, QString call) {
 }
 
 ConsoleEdit::exec_sync::exec_sync(int timeout_ms) : timeout_ms(timeout_ms) {
-    stop_ = CT;
+    stop_ = QThread::currentThread();
     go_ = 0;
 }
 void ConsoleEdit::exec_sync::stop() {
-    Q_ASSERT(CT == stop_);
+    Q_ASSERT(QThread::currentThread() == stop_);
     for ( ; ; ) {
         {   QMutexLocker lk(&sync);
             if (go_)
@@ -912,7 +912,7 @@ void ConsoleEdit::exec_sync::stop() {
 void ConsoleEdit::exec_sync::go() {
     Q_ASSERT(go_ == 0);
     Q_ASSERT(stop_ != 0);
-    auto t = CT;
+    auto t = QThread::currentThread();
     if (stop_ != t) {
         QMutexLocker lk(&sync);
         go_ = t;

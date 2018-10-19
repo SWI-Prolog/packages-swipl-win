@@ -610,7 +610,7 @@ void ConsoleEdit::user_prompt(int threadId, bool tty) {
 
     is_tty = tty;
 
-    Completion::helpidx();
+    Completion::setup();
 
     QTextCursor c = textCursor();
     c.movePosition(QTextCursor::End);

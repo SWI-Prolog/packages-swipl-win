@@ -116,59 +116,34 @@ void Completion::initialize(QStringList &strings) {
     }
 }
 
-Completion::status Completion::helpidx_status = Completion::untried;
+Completion::status Completion::setup_status = Completion::untried;
 Completion::t_pred_docs Completion::pred_docs;
 
 /** initialize and cache all predicates with description
  */
-bool Completion::helpidx() {
-    if (helpidx_status == untried) {
-        helpidx_status = missing;
+bool Completion::setup() {
+    if (setup_status == untried) {
+        setup_status = missing;
         SwiPrologEngine::in_thread _e;
         try {
-            if (    PlCall("load_files(library(helpidx), [silent(true)])") &&
-                    PlCall("current_module(help_index)"))
-            {
-                {   PlTerm Name, Arity, Descr, Start, Stop;
-                    PlQuery q("help_index", "predicate", V(Name, Arity, Descr, Start, Stop));
-                    while (q.next_solution()) {
-                        long arity = Arity.type() == PL_INTEGER ? long(Arity) : -1;
-                        QString name = t2w(Name);
-                        t_pred_docs::iterator x = pred_docs.find(name);
-                        if (x == pred_docs.end())
-                            x = pred_docs.insert(name, t_decls());
-                        x.value().append(qMakePair(int(arity), t2w(Descr)));
-                    }
-                }
-
-                if (PlCall("load_files(library(console_input), [silent(true)])"))
-                    if (PlCall("current_module(prolog_console_input)"))
-                        helpidx_status = available;
-            }
-
-            /*
-            if (!PlCall("current_module(prolog_console_input)")) {
-                QString ci = "console_input.pl";
-                QFile f(QString(":/%1").arg(ci));
-                if (f.open(f.ReadOnly)) {
-                    QTextStream s(&f);
-                    if (!_e.named_load(ci, s.readAll()))
-                        qDebug() << "can't load" << ci;
-                }
-            }
-            */
+            if ( PlCall("load_files(library(console_input), [silent(true)])") &&
+		 PlCall("current_predicate(prolog:complete_input/4)")) {
+	        setup_status = available;
+	    }
         }
         catch(PlException e) {
-            qDebug() << CCP(e);
+//            qDebug() << CCP(e);
         }
     }
 
-    return helpidx_status == available && !pred_docs.isEmpty();
+    return setup_status == available;
 }
 
 /** access/compute predicate description tip from cached
+ * FIXME: Base tooltip on a callback
  */
 QString Completion::pred_tip(QTextCursor c) {
+#if 0
     if (helpidx_status == available) {
         c.select(c.WordUnderCursor);
         QString w =  c.selectedText();
@@ -180,5 +155,6 @@ QString Completion::pred_tip(QTextCursor c) {
             return l.join("\n");
         }
     }
+#endif
     return "";
 }

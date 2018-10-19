@@ -53,7 +53,7 @@ struct PQCONSOLESHARED_EXPORT Completion
 
     /** tooltips display, from helpidx.pl */
     enum status { untried, available, missing };
-    static status helpidx_status;
+    static status setup_status;
 
     /** predicate -> declarations */
     typedef QPair<int, QString> t_decl;
@@ -62,7 +62,7 @@ struct PQCONSOLESHARED_EXPORT Completion
     static t_pred_docs pred_docs;
 
     /** initialize if required, return true if available */
-    static bool helpidx();
+    static bool setup();
 
     /** access/compute predicate description tip from cached */
     static QString pred_tip(QTextCursor c);

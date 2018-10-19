@@ -166,6 +166,7 @@ static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
         case QVariant::String:
             if (p.write(o, t2w(v)))
                 OK;
+	    break;
         case QVariant::Int:
             if (p.isEnumType()) {
                 Q_ASSERT(!p.isFlagType());  // TBD

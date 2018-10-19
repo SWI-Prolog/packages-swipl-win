@@ -253,7 +253,7 @@ void ConsoleEdit::keyPressEvent(QKeyEvent *event) {
 
     case Key_Up:
         down = false;
-        // fall throu
+        // fall through
     case Key_Down:
         if (!ctrl) {
             // naive history handler
@@ -318,7 +318,7 @@ void ConsoleEdit::keyPressEvent(QKeyEvent *event) {
             PL_thread_raise(thids[0], SIGINT);
             return;
         }
-        // fall throu
+        // fall through
 
     default:
         accept = editable || event->matches(QKeySequence::Copy);

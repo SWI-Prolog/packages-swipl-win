@@ -226,10 +226,10 @@ void SwiPrologEngine::run() {
     Soutput->flags &= ~SIO_FILE;
     Serror->flags  &= ~SIO_FILE;
 
-    PL_set_prolog_flag("console_menu", PL_BOOL, TRUE);
-    PL_set_prolog_flag("console_menu_version", PL_ATOM, "qt");
+    PL_set_prolog_flag("console_menu", PL_BOOL|FF_READONLY, TRUE);
+    PL_set_prolog_flag("console_menu_version", PL_ATOM|FF_READONLY, "qt");
     PL_set_prolog_flag("xpce_threaded", PL_BOOL, TRUE);
-    PL_set_prolog_flag("readline", PL_ATOM, "swipl_win");
+    PL_set_prolog_flag("readline", PL_ATOM|FF_READONLY, "swipl_win");
 
     target->add_thread(1);
     PL_exit_hook(halt_engine, NULL);

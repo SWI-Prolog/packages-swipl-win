@@ -51,11 +51,12 @@ list(APPEND QT_DEFINES -DLQUTY_STATIC)
 include_directories(BEFORE
 		    ${SWIPL_ROOT}/packages/cpp)
 
-add_executable(swipl-win ${PLWIN_SRC})
+add_executable(swipl-win MACOSX_BUNDLE ${PLWIN_SRC})
 target_link_libraries(swipl-win libswipl Qt5::Widgets)
 target_compile_options(swipl-win PRIVATE ${QT_DEFINES})
 
 install(TARGETS swipl-win
+	BUNDLE DESTINATION .
 	RUNTIME DESTINATION ${SWIPL_INSTALL_ARCH_EXE})
 
 if(NOT WIN32)

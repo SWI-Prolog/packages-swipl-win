@@ -51,7 +51,16 @@ list(APPEND QT_DEFINES -DLQUTY_STATIC)
 include_directories(BEFORE
 		    ${SWIPL_ROOT}/packages/cpp)
 
+if(BUILD_MACOS_BUNDLE)
+  set(SWIPL_APP_NAME SWI-Prolog)
+else()
+  set(SWIPL_APP_NAME swipl-win)
+endif()
+
 add_executable(swipl-win MACOSX_BUNDLE ${PLWIN_SRC})
+set_target_properties(swipl-win PROPERTIES
+		      OUTPUT_NAME "${SWIPL_APP_NAME}"
+		      MACOSX_BUNDLE_ICON_FILE swipl.icns)
 target_link_libraries(swipl-win libswipl Qt5::Widgets)
 target_compile_options(swipl-win PRIVATE ${QT_DEFINES})
 

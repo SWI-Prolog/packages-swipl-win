@@ -68,7 +68,7 @@ install(TARGETS swipl-win
 	BUNDLE DESTINATION .
 	RUNTIME DESTINATION ${SWIPL_INSTALL_ARCH_EXE})
 
-if(NOT WIN32)
+if(NOT WIN32 AND NOT BUILD_MACOS_BUNDLE)
 # Create symbolic link from public installation dir to executables
 install(DIRECTORY DESTINATION bin)
 ilink(${CMAKE_INSTALL_PREFIX}/${SWIPL_INSTALL_ARCH_EXE}/swipl-win

@@ -67,6 +67,10 @@ target_compile_options(swipl-win PRIVATE ${QT_DEFINES})
 install(TARGETS swipl-win
 	BUNDLE DESTINATION .
 	RUNTIME DESTINATION ${SWIPL_INSTALL_ARCH_EXE})
+if(BUILD_MACOS_BUNDLE)
+  install(FILES swipl.icns
+	  DESTINATION ${SWIPL_INSTALL_RESOURCES})
+endif()
 
 if(NOT WIN32 AND NOT BUILD_MACOS_BUNDLE)
 # Create symbolic link from public installation dir to executables

@@ -53,9 +53,10 @@ include_directories(BEFORE
 
 if(BUILD_MACOS_BUNDLE)
   set(SWIPL_APP_NAME SWI-Prolog)
-  set(MACOSX_BUNDLE_INFO_STRING "Created by the SWI-Prolog project")
-  set(MACOSX_BUNDLE_COPYRIGHT   "BSD-2")
-  set(MACOSX_BUNDLE_HELP_FILE   "swipl-macosx.html")
+  set(MACOSX_BUNDLE_GUI_IDENTIFIER "org.swi-prolog.app")
+  set(MACOSX_BUNDLE_INFO_STRING    "Created by the SWI-Prolog project")
+  set(MACOSX_BUNDLE_COPYRIGHT      "BSD-2")
+  set(MACOSX_BUNDLE_HELP_FILE      "swipl-macosx.html")
 else()
   set(SWIPL_APP_NAME swipl-win)
 endif()

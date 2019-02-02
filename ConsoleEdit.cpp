@@ -708,6 +708,15 @@ void ConsoleEdit::onCursorPositionChanged() {
         setReadOnly(false);
         viewport()->setCursor(Qt::IBeamCursor);
     }
+
+    if (pmatched.size()) {
+        pmatched.format_both(c);
+        pmatched = ParenMatching::range();
+    }
+
+    ParenMatching pm(c);
+    if (pm)
+        (pmatched = pm.positions).format_both(c, pmatched.bold());
 }
 
 /** check if line content is appropriate, then highlight or open editor on it */

@@ -50,6 +50,7 @@
 
 #include "SwiPrologEngine.h"
 #include "Completion.h"
+#include "ParenMatching.h"
 
 #include <QElapsedTimer>
 
@@ -243,6 +244,11 @@ protected:
 
     /** relax selection check requirement */
     QElapsedTimer sel_check_timing;
+
+protected:
+
+    /** keep last matched pair */
+    ParenMatching::range pmatched;
 
 public slots:
 

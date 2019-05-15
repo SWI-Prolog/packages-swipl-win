@@ -13,17 +13,20 @@ find_package(Qt5Widgets CONFIG)
 
 if(Qt5Widgets_FOUND)
 
+set(PLWIN_RESOURCES
+    swipl-win.qrc)
+
+qt5_add_resources(SWIPL_RES_SOURCES ${PLWIN_RESOURCES})
+
 set(PLWIN_SRC main.cpp SwiPrologEngine.cpp Swipl_IO.cpp Preferences.cpp
     pqMainWindow.cpp pqConsole.cpp FlushOutputEvents.cpp ConsoleEdit.cpp
-    Completion.cpp swipl_win.cpp ParenMatching.cpp)
-
-set(PLWIN_MOC
-    qrc_swipl-win.cpp
-    moc_SwiPrologEngine.cpp moc_Swipl_IO.cpp moc_Preferences.cpp
-    moc_pqMainWindow.cpp moc_ConsoleEdit.cpp moc_swipl_win.cpp
-    moc_ParenMatching.cpp)
+    Completion.cpp swipl_win.cpp ParenMatching.cpp ${SWIPL_RES_SOURCES})
 
 set(QT_DEFINES)
+
+if(MULTI_THREADED)
+list(APPEND QT_DEFINES -D_REENTRANT)
+endif()
 
 # provide appropriate linking mode for
 # static compilation of pqConsole source files

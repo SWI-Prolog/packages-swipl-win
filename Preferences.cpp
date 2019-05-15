@@ -47,7 +47,8 @@ QColor Preferences::ANSI2col(int c, bool highlight) {
  */
 Preferences::Preferences(QObject *parent) :
     QSettings("SWI-Prolog", "pqConsole", parent)
-{
+{   qDebug() << "Loading preferences from " << fileName();
+
     console_font = value("console_font", QFont("courier", 12)).value<QFont>();
     wrapMode = static_cast<ConsoleEditBase::LineWrapMode>(value("wrapMode", ConsoleEditBase::WidgetWidth).toInt());
 

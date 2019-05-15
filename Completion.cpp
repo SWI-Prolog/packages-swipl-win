@@ -74,9 +74,12 @@ QString Completion::initialize(int promptPosition, QTextCursor c, QStringList &s
         PlString After(after.toStdWString().data());
 
         PlTerm Completions, Delete, word;
-        if (PlCall("prolog", "complete_input", PlTermv(Before, After, Delete, Completions)))
-            for (PlTail l(Completions); l.next(word); )
+        if (PlCall("prolog", "complete_input", PlTermv(Before, After, Delete, Completions))) {
+            PlTail l(Completions); // cautiously make an explicit call to close
+            while (l.next(word))
                 strings.append(t2w(word));
+            l.close();
+        }
 
         c.setPosition(p);
         rets = t2w(Delete);

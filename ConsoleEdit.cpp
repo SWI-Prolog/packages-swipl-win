@@ -440,7 +440,7 @@ void ConsoleEdit::compinit2(QTextCursor c) {
     QStringList lpreds;
     foreach (auto a, atoms) {
         auto p = Completion::pred_docs.constFind(a);
-        if (p != Completion::pred_docs.end())
+        if (p != Completion::pred_docs.constEnd()) // was pred_docs.end(), seems a Qt bug it's allowed
             foreach (auto d, p.value()) {
                 QStringList la;
                 for (int n = 0; n < d.first; ++n)

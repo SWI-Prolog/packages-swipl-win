@@ -2,7 +2,7 @@
 
     Author:        Carlo Capelli
     E-mail:        cc.carlo.cap@gmail.com
-    Copyright (c)  2013-2015, Carlo Capelli
+    Copyright (c)  2013-2019, Carlo Capelli
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -348,6 +348,15 @@ PREDICATE(win_insert_menu_item, 4) {
             Label = t2w(PL_A2);
             Goal = t2w(PL_A4);
         }
+
+        // this (rude) fix whould go in swipl_devel/library/win_menu.pl
+        //qDebug() << "win_insert_menu_item" << Label;
+        if (Label == "Load &Recent")
+            Label = "&Load Recent";
+        if (Label == "&Reload modified files")
+            Label = "Reload &Modified Files";
+        if (Label == "&Navigator ...")
+            Label = "Na&vigator ...";
 
         QString ctxtmod = t2w(PlAtom(PL_module_name(PL_context())));
         // if (PlCall("context_module", cx)) ctxtmod = t2w(cx); -- same as above: system

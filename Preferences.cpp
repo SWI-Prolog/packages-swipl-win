@@ -36,6 +36,11 @@
 
 QList<QColor> Preferences::ANSI_sequences;
 
+int Preferences::console_out_fore,
+    Preferences::console_out_back,
+    Preferences::console_inp_fore,
+    Preferences::console_inp_back;
+
 /** peek color by index
  */
 QColor Preferences::ANSI2col(int c, bool highlight) {

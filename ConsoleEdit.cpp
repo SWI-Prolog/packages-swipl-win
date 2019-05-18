@@ -46,8 +46,8 @@
 #include <QTextBlock>
 
 #include <QTime>
+#include <QDebug>
 #include <QRegExp>
-#include <QtDebug>
 #include <QAction>
 #include <QToolTip>
 #include <QKeyEvent>
@@ -56,6 +56,8 @@
 #include <QMainWindow>
 #include <QApplication>
 #include <QStringListModel>
+
+#include "ansi_esc_seq.h"
 
 /** peek color by index */
 static QColor ANSI2col(int c, bool highlight = false) { return Preferences::ANSI2col(c, highlight); }
@@ -506,45 +508,36 @@ void ConsoleEdit::user_output(QString text) {
     }
 
     auto instext = [&](QString text) {
-
-        int ltext;
-//#ifndef PQCONSOLE_HANDLE_HOOVERING
-#if 0
-        static QRegExp jmsg("(ERROR|Warning):[ \t]*(([a-zA-Z]:)?[^:]+):([0-9]+)(:([0-9]+))?.*", Qt::CaseSensitive, QRegExp::RegExp2);
-        if (jmsg.exactMatch(text)) {
-            QStringList parts = jmsg.capturedTexts();
-            //qDebug() << "file" << parts[2].trimmed() << "line" << parts[4].trimmed() << "char" << parts[6].trimmed();
-            auto edit = QString("'%1':%2").arg(parts[2].trimmed()).arg(parts[4].trimmed());
-            if (!parts[6].isEmpty())
-                edit += ":" + parts[6];
-            auto html = QString("<a style=\"jmsg\" href=\"system:edit(%1)\">%2</a><br>").arg(edit).arg(text);
-            //c.movePosition(c.StartOfLine);
-            c.insertHtml(html);
-            //c.movePosition(c.EndOfLine);
-        }
+        if (color_term)
+            c.insertText(text, output_text_fmt);
         else
-#endif
-        {
-            if (color_term)
-                c.insertText(text, output_text_fmt);
-            else
-                c.insertText(text);
-        }
-
+            c.insertText(text);
         if (status == wait_input) {
-            ltext = text.length();
+            int ltext = text.length();
             promptPosition += ltext;
             fixedPosition += ltext;
             ensureCursorVisible();
         }
     };
 
+    ANSI_ESC_SEQ filter(text, output_text_fmt);
+    if (filter)
+        while (filter)
+            instext(filter.next());
+    else
+        instext(text);
+
+#if 0
     // filter and apply (some) ANSI sequence
-    int pos = text.indexOf('\e');
+    int pos = text.indexOf(0x1b);
     if (pos >= 0) {
+
+//QTextStream out(stdout);
+//out << text << endl;
+
         int left = 0;
 
-        static QRegExp eseq("\e\\[(?:(3([0-7]);([01])m)|(0m)|(1m;)|1;3([0-7])m|(1m)|(?:3([0-7])m))");
+        static QRegExp eseq("\x001b\\[(?:(3([0-7]);([01])m)|(0m)|(1m;)|1;3([0-7])m|(1m)|(?:3([0-7])m))");
 
         forever {
             int pos1 = eseq.indexIn(text, pos);
@@ -596,6 +589,7 @@ void ConsoleEdit::user_output(QString text) {
     }
     else
         instext(text);
+#endif
 }
 
 bool ConsoleEdit::match_thread(int thread_id) const {

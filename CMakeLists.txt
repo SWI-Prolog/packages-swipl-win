@@ -20,7 +20,7 @@ qt5_add_resources(SWIPL_RES_SOURCES ${PLWIN_RESOURCES})
 
 set(PLWIN_SRC main.cpp SwiPrologEngine.cpp Swipl_IO.cpp Preferences.cpp
     pqMainWindow.cpp pqConsole.cpp FlushOutputEvents.cpp ConsoleEdit.cpp
-    Completion.cpp swipl_win.cpp ParenMatching.cpp ${SWIPL_RES_SOURCES})
+    Completion.cpp swipl_win.cpp ParenMatching.cpp ansi_esc_seq.cpp ${SWIPL_RES_SOURCES})
 
 set(QT_DEFINES)
 

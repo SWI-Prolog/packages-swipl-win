@@ -60,10 +60,11 @@ public:
     static QColor ANSI2col(int c, bool highlight = false);
 
     /** indices into colors' list */
-    int console_out_fore;
-    int console_out_back;
-    int console_inp_fore;
-    int console_inp_back;
+    static int
+        console_out_fore,
+        console_out_back,
+        console_inp_fore,
+        console_inp_back;
 
     /** enable a scroll bar when not wrapped */
     ConsoleEditBase::LineWrapMode wrapMode;

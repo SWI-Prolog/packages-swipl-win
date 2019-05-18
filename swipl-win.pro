@@ -78,7 +78,8 @@ SOURCES += main.cpp \
     ConsoleEdit.cpp \
     Completion.cpp \
     swipl_win.cpp \
-    ParenMatching.cpp
+    ParenMatching.cpp \
+    ansi_esc_seq.cpp
 
 RESOURCES += \
     swipl-win.qrc
@@ -102,4 +103,5 @@ HEADERS += \
     swipl_win.h \
     blockSig.h \
     lqUty_global.h \
-    ParenMatching.h
+    ParenMatching.h \
+    ansi_esc_seq.h

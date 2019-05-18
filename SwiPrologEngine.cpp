@@ -231,6 +231,9 @@ void SwiPrologEngine::run() {
     PL_set_prolog_flag("xpce_threaded", PL_BOOL, TRUE);
     PL_set_prolog_flag("readline", PL_ATOM|FF_READONLY, "swipl_win");
 
+    // force usage of fixed ANSI ESC sequence for help console output
+    PL_set_prolog_flag("help_pager", PL_BOOL, FALSE);
+
     target->add_thread(1);
     PL_exit_hook(halt_engine, NULL);
 

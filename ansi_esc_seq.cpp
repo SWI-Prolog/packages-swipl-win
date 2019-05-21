@@ -117,7 +117,7 @@ QString ANSI_ESC_SEQ::next()
         _c, _c, _c, _c
     };
 
-    static QRegularExpression eseq("(0m|39m)|(1;1;1m|1;1m|1m)|(3[0-7]m|3[0-7];1m)|(1;3[0-7];1m)|(4[0-7]m)");
+    static QRegularExpression eseq("(0m|39m)|(1;1;1m|1;1m|1m)|(3[0-7]m|3[0-7];1m)|(1;3[0-7];1m)|(1;3[0-7]m)|(4[0-7]m)");
     QRegularExpressionMatch m = eseq.match(src, pos + 2);
     QString p;
 
@@ -139,6 +139,10 @@ QString ANSI_ESC_SEQ::next()
             seq.mode.fg = SGR::Color(p[3].digitValue());
         } else
         if (!(p = m.captured(5)).isNull()) {
+            seq.mode.f = SGR::Formatting::Bold;
+            seq.mode.fg = SGR::Color(p[3].digitValue());
+        } else
+        if (!(p = m.captured(6)).isNull()) {
             seq.mode.bg = SGR::Color(p[1].digitValue());
         }
 

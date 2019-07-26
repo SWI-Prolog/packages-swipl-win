@@ -896,3 +896,48 @@ PREDICATE(win_html_write, 1) {
     }
     return FALSE;
 }
+
+/* support theming in console
+ */
+PREDICATE(win_window_color, 2) {
+
+    ConsoleEdit* c = console_by_thread();
+    if (c) {
+        PlTerm rgb = PL_A2;
+        if (rgb.name() == QStringLiteral("rgb")) {
+            int r = rgb[1], g = rgb[2], b = rgb[3];
+            QRgb val = qRgb(r, g, b);
+            auto which = t2w(PL_A1);
+
+            ConsoleEdit::exec_sync s;
+            c->exec_func([&]() {
+                auto setcp = [=](QPalette::ColorRole r, int out = -1, int inp = -1) {
+                    auto p = c->palette();
+                    p.setColor(QPalette::Active, r, val);
+                    p.setColor(QPalette::Inactive, r, val);
+                    c->setPalette(p);
+                    if (out >= 0 && inp >= 0) {
+                        Preferences::ANSI_sequences[out] = val;
+                        Preferences::ANSI_sequences[inp] = val;
+                        c->set_colors();
+                    }
+                };
+                if (which == "foreground") {
+                    setcp(QPalette::Text, Preferences::console_out_fore, Preferences::console_inp_fore);
+                } else if (which == "background") {
+                    setcp(QPalette::Base, Preferences::console_out_back, Preferences::console_inp_back);
+                } else if (which == "selection_foreground")
+                    setcp(QPalette::HighlightedText);
+                else if (which == "selection_background")
+                    setcp(QPalette::Highlight);
+
+                s.go();
+            });
+            s.stop();
+            return TRUE;
+        }
+        //throw PlDomainError(err_expected_desc, err_expected_term);
+        //c->repaint();
+    }
+    return FALSE;
+}

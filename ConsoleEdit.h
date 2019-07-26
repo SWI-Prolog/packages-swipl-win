@@ -140,6 +140,8 @@ public:
     /** can be disabled from ~/.plrc */
     static bool color_term;
 
+    void set_colors();
+
 protected:
 
     /** host actual interface object, running in background */

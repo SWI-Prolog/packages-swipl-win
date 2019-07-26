@@ -154,12 +154,14 @@ void ConsoleEdit::setup() {
 
     Preferences p;
 
-    // preset presentation attributes
+    /*/ preset presentation attributes
     output_text_fmt.setForeground(ANSI2col(p.console_out_fore));
     output_text_fmt.setBackground(ANSI2col(p.console_out_back));
 
     input_text_fmt.setForeground(ANSI2col(p.console_inp_fore));
     input_text_fmt.setBackground(ANSI2col(p.console_inp_back));
+    */
+    set_colors();
 
     setLineWrapMode(p.wrapMode);
     setFont(p.console_font);
@@ -170,6 +172,16 @@ void ConsoleEdit::setup() {
 
     // so far,
     connect(this, SIGNAL(selectionChanged()), this, SLOT(selectionChanged()));
+}
+
+/** set presentation attributes
+ */
+void ConsoleEdit::set_colors() {
+    output_text_fmt.setForeground(ANSI2col(Preferences::console_out_fore));
+    output_text_fmt.setBackground(ANSI2col(Preferences::console_out_back));
+
+    input_text_fmt.setForeground(ANSI2col(Preferences::console_inp_fore));
+    input_text_fmt.setBackground(ANSI2col(Preferences::console_inp_back));
 }
 
 /** strict control on keyboard events required

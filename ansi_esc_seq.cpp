@@ -117,7 +117,7 @@ QString ANSI_ESC_SEQ::next()
         _c, _c, _c, _c
     };
 
-    static QRegularExpression eseq("(0m|39m)|(1;1;1m|1;1m|1m)|(3[0-7]m|3[0-7];1m)|(1;3[0-7];1m)|(1;3[0-7]m)|(4[0-7]m)|(9[0-7]m)");
+    static QRegularExpression eseq("(0m|39m)|(1;1;1m|1;1m|1m)|(3[0-7]m|3[0-7];1m|3[0-7];1;1m)|(1;3[0-7];1m)|(1;3[0-7]m)|(4[0-7]m)|(9[0-7]m)");
     QRegularExpressionMatch m = eseq.match(src, pos + 2);
     QString p;
 

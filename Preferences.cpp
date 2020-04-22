@@ -51,10 +51,12 @@ QColor Preferences::ANSI2col(int c, bool highlight) {
 /** get configured values, with reasonable defaults
  */
 Preferences::Preferences(QObject *parent) :
-    QSettings("SWI-Prolog", "pqConsole", parent)
+    QSettings("swi-prolog", "pqConsole", parent)
 {   qDebug() << "Loading preferences from " << fileName();
 
-    console_font = value("console_font", QFont("courier", 12)).value<QFont>();
+    QFont default_font("Monospace");
+    default_font.setStyleHint(QFont::Monospace);
+    console_font = value("console_font", default_font).value<QFont>();
     wrapMode = static_cast<ConsoleEditBase::LineWrapMode>(value("wrapMode", ConsoleEditBase::WidgetWidth).toInt());
 
     console_out_fore = value("console_out_fore", 0).toInt();

@@ -66,7 +66,6 @@ inline QString serialize(PlTerm t) {
       return QString::fromWCharArray(s);
 
     throw PlTypeError("text", t);
-    PL_THROWN(NULL);
 }
 
 typedef PlTerm T;

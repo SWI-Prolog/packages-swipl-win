@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
    avoiding linking to a new C++ shared object.
 */
 
-#if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ < 1070
+#if defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__) && __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ < 1070
 namespace std {
 void __throw_bad_function_call()
 { fprintf(stderr, "Bad function call\n");

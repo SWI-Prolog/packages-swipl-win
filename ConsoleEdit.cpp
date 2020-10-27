@@ -909,7 +909,7 @@ void ConsoleEdit::query_run(QString module, QString call) {
         query_run(module + ":" + call);
 }
 
-ConsoleEdit::exec_sync::exec_sync(int timeout_ms) : timeout_ms(timeout_ms) {
+ConsoleEdit::exec_sync::exec_sync(int timeout_ms) {
     stop_ = QThread::currentThread();
     go_ = 0;
 }

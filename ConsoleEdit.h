@@ -115,7 +115,6 @@ public:
     private:
         QThread *stop_, *go_;
         QMutex sync;
-        int timeout_ms;
     };
 
     /** give access to rl_... predicates */

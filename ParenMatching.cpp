@@ -34,6 +34,7 @@
 #include "ParenMatching.h"
 #include <QTextStream>
 #include <QTextBlock>
+#include <QtGlobal>
 
 ParenMatching::ParenMatching(QTextCursor c)
     : onOpen(false)
@@ -74,6 +75,12 @@ ParenMatching::ParenMatching(QTextCursor c)
     c.setPosition(save_p);
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,14,0)
+#define ENDL Qt::endl
+#else
+#define ENDL endl
+#endif
+
 /** utility: fetch text in range from a text document
  */
 QString ParenMatching::range::plainText(QTextDocument *doc) const
@@ -84,9 +91,9 @@ QString ParenMatching::range::plainText(QTextDocument *doc) const
         e = doc->findBlock(end);
     QTextStream s(&x);
     if (b != e) {
-        s << b.text().mid(b.position() - beg) << endl;
+        s << b.text().mid(b.position() - beg) << ENDL;
         for (b = b.next(); b != e; b = b.next())
-            s << b.text() << endl;
+            s << b.text() << ENDL;
         s << b.text().left(end - b.position());
     }
     else
@@ -105,7 +112,7 @@ QString ParenMatching::range::linesText(QTextDocument *doc) const
     if (b != doc->end()) {
         QTextStream s(&x);
         for ( ; b != e; b = b.next())
-            s << b.text() << endl;
+            s << b.text() << ENDL;
         if (b != doc->end())
             s << b.text();
     }

@@ -57,7 +57,7 @@ unix {
 }
 
 windows {
-    SwiPl = "C:\Program Files\pl"
+    SwiPl = "C:\Program Files\swipl"
     INCLUDEPATH += $$SwiPl\include
     LIBS += -L$$SwiPl\bin -lswipl
 }

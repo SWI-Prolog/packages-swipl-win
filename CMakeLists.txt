@@ -4,19 +4,32 @@ project(swipl-swipl-win)
 include("../cmake/PrologPackage.cmake")
 include(Install)
 
-set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt5Widgets CONFIG)
+find_package(Qt6 COMPONENTS Widgets QUIET)
+if(NOT Qt6Widgets_FOUND)
+  find_package(Qt5Widgets CONFIG)
+else()
+  find_package(Qt6 COMPONENTS Widgets)		# Again for the warning
+endif()
 
-if(Qt5Widgets_FOUND)
+if(Qt5Widgets_FOUND OR Qt6Widgets_FOUND)
 
 set(PLWIN_RESOURCES
     swipl-win.qrc)
 
-qt5_add_resources(SWIPL_RES_SOURCES ${PLWIN_RESOURCES})
+if(Qt5Widgets_FOUND)
+  set(CMAKE_CXX_STANDARD 11)
+  qt5_add_resources(SWIPL_RES_SOURCES ${PLWIN_RESOURCES})
+  set(QT_WIDGETS Qt5::Widgets)
+else()
+  find_package(Qt6 COMPONENTS Core5Compat REQUIRED)
+  set(CMAKE_CXX_STANDARD 17)
+  set(QT_WIDGETS Qt6::Widgets Qt6::Core5Compat)
+  list(APPEND PLWIN_SRC ${PLWIN_RESOURCES})
+endif()
 
 set(PLWIN_SRC main.cpp SwiPrologEngine.cpp Swipl_IO.cpp Preferences.cpp
     pqMainWindow.cpp pqConsole.cpp FlushOutputEvents.cpp ConsoleEdit.cpp
@@ -68,7 +81,7 @@ add_executable(swipl-win MACOSX_BUNDLE ${PLWIN_SRC})
 set_target_properties(swipl-win PROPERTIES
 		      OUTPUT_NAME "${SWIPL_APP_NAME}"
 		      MACOSX_BUNDLE_ICON_FILE swipl.icns)
-target_link_libraries(swipl-win libswipl Qt5::Widgets)
+target_link_libraries(swipl-win libswipl ${QT_WIDGETS})
 target_compile_options(swipl-win PRIVATE ${QT_DEFINES})
 
 install(TARGETS swipl-win
@@ -86,4 +99,4 @@ ilink(${CMAKE_INSTALL_PREFIX}/${SWIPL_INSTALL_ARCH_EXE}/swipl-win
       ${CMAKE_INSTALL_PREFIX}/bin/swipl-win)
 endif()
 
-endif(Qt5Widgets_FOUND)
+endif() # Qt5Widgets

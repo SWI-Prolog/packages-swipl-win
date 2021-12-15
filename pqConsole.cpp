@@ -378,12 +378,13 @@ PREDICATE(win_insert_menu_item, 4) {
                             return;
                         }
                         else {
-                            if (Label != "--")
+                            if (Label != "--") {
                                 foreach (QAction *bc, mn->actions())
                                     if (bc->text() == Label) {
                                         bc->setToolTip(Goal);
                                         return;
                                     }
+                            }
                             if (Before == "-") {
                                 if (Label == "--")
                                     mn->addSeparator();

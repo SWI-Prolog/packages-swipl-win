@@ -47,7 +47,7 @@
 inline ConsoleEdit *wid2con(QWidget *w) { return qobject_cast<ConsoleEdit*>(w); }
 
 pqMainWindow::pqMainWindow(QWidget *parent) :
-    QMainWindow(parent), menu2pl(0) {
+    QMainWindow(parent) {
 #ifndef __APPLE__
   QMenuBar *mb = menuBar();
   mb->setNativeMenuBar(false);
@@ -62,8 +62,6 @@ pqMainWindow::pqMainWindow(int argc, char *argv[]) {
     QMenuBar *mb = menuBar();
     mb->setNativeMenuBar(false);
 #endif
-    // dispatch signals indexed
-    menu2pl = new cSignalMapper;
 
     setCentralWidget(new ConsoleEdit(argc, argv));
 
@@ -185,15 +183,23 @@ void pqMainWindow::remConsole(ConsoleEdit *c) {
 /** handle menu dispatch by means of Qt signal mapper
  */
 void pqMainWindow::addActionPq(ConsoleEdit *ce, QMenu *cmmenu, QString label, QString action) {
+    if (!menu2pl) {
+        menu2pl = new QSignalMapper;
+        connect(menu2pl, &QSignalMapper::mappedString, ce, &ConsoleEdit::onConsoleMenuActionMap);
+    }
+
+    // dispatch signals indexed
     QAction *a = cmmenu->addAction(label, menu2pl, SLOT(map()));
     menu2pl->setMapping(a, action);
-    if (0 == menu2pl->receivers(SIGNAL(mapped(const QString &))))
-        connect(menu2pl, SIGNAL(mapped(const QString &)), ce, SLOT(onConsoleMenuActionMap(const QString &)));
 }
 
 /** ditto
  */
 QAction* pqMainWindow::add_action(ConsoleEdit *ce, QMenu *mn, QString Label, QString ctxtmod, QString Goal, QAction *before) {
+    if (!menu2pl) {
+        menu2pl = new QSignalMapper;
+        connect(menu2pl, &QSignalMapper::mappedString, ce, &ConsoleEdit::onConsoleMenuActionMap);
+    }
 
     QAction *a;
     if (!before)
@@ -203,9 +209,6 @@ QAction* pqMainWindow::add_action(ConsoleEdit *ce, QMenu *mn, QString Label, QSt
         connect(a, SIGNAL(triggered()), menu2pl, SLOT(map()));
     }
     menu2pl->setMapping(a, ctxtmod + ':' + Goal);
-
-    if (0 == menu2pl->receivers(SIGNAL(mapped(const QString &))))
-        connect(menu2pl, SIGNAL(mapped(const QString &)), ce, SLOT(onConsoleMenuActionMap(QString)));
 
     return a;
 }

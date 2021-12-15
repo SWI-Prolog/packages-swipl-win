@@ -47,7 +47,8 @@
 
 #include <QTime>
 #include <QDebug>
-#include <QRegExp>
+//#include <QRegExp>
+#include <QRegularExpression>
 #include <QAction>
 #include <QToolTip>
 #include <QKeyEvent>
@@ -458,7 +459,7 @@ void ConsoleEdit::compinit2(QTextCursor c) {
             foreach (auto d, p.value()) {
                 QStringList la;
                 for (int n = 0; n < d.first; ++n)
-                    la.append(QString('A' + n));
+                    la.append(QString(QChar('A' + n)));
                 if (!la.isEmpty())
                     lpreds.append(QString("%1(%2) | %3").arg(a).arg(la.join(", ")).arg(d.second));
                 else
@@ -745,29 +746,28 @@ void ConsoleEdit::clickable_message_line(QTextCursor c, bool highlight) {
     c.movePosition(c.EndOfLine, c.KeepAnchor);
 
     QString line = c.selectedText();
-    static QRegExp msg("(ERROR|Warning):[ \t]*(([a-zA-Z]:)?[^:]+):([0-9]+)(:([0-9]+))?.*",
-		       Qt::CaseSensitive, QRegExp::RegExp2);
-    if ( msg.exactMatch(line) ) {
-        QStringList parts = msg.capturedTexts();
-     // qDebug() << "file" << parts[2] << "line" << parts[4] << "char" << parts[6];
-
-	if ( highlight ) {
-	    if (cposition != cposition_) {
-	        cposition = cposition_;
-		fposition = fposition_;
-		QTextCharFormat f = fposition_;
-		f.setFontUnderline(true);
-		c.setCharFormat(f);
-	    }
-	    return;
-	} else {
-	    auto cmd = QString("edit('"+parts[2]+"':"+parts[4]);
-	    if ( !parts[6].isEmpty() )
-	        cmd += ":"+parts[6];
-	    cmd += ")";
-	    qDebug() << cmd;
-	    query_run(cmd);
-	}
+    static QRegularExpression msg("(ERROR|Warning):[ \t]*(([a-zA-Z]:)?[^:]+):([0-9]+)(:([0-9]+))?.*",
+                                  QRegularExpression::CaseInsensitiveOption);
+    auto parts = msg.match(line);
+    if (parts.hasMatch()) {
+        if ( highlight ) {
+            if (cposition != cposition_) {
+                cposition = cposition_;
+                fposition = fposition_;
+                QTextCharFormat f = fposition_;
+                f.setFontUnderline(true);
+                c.setCharFormat(f);
+            }
+            return;
+        } else {
+            auto cmd = QString("edit('"+parts.captured(2)+"':"+parts.captured(4));
+            if ( !parts.captured(6).isEmpty() ) {
+                cmd += ":"+parts.captured(6);
+            }
+            cmd += ")";
+            qDebug() << cmd;
+            query_run(cmd);
+        }
     }
 
     if (fposition != QTextCharFormat()) {
@@ -805,7 +805,7 @@ void ConsoleEdit::onConsoleMenuAction() {
         onConsoleMenuActionMap(action);
     }
 }
-void ConsoleEdit::onConsoleMenuActionMap(const QString& action) {
+void ConsoleEdit::onConsoleMenuActionMap(QString action) {
     if (auto w = find_parent<pqMainWindow>(this)) {
         if (ConsoleEdit *target = w->consoleActive()) {
             qDebug() << action << target->status << QTime::currentTime();
@@ -910,6 +910,7 @@ void ConsoleEdit::query_run(QString module, QString call) {
 }
 
 ConsoleEdit::exec_sync::exec_sync(int timeout_ms) {
+    Q_UNUSED(timeout_ms);
     stop_ = QThread::currentThread();
     go_ = 0;
 }

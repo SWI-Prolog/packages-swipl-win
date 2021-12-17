@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
     if ( (logname = getenv("QDEBUG")) ) {
         nolog = false;
         if ( strcmp(logname, "stderr") != 0 )
-	    logfile = fopen(logname, "w");
+            logfile = fopen(logname, "w");
     }
 
 #if QT_VERSION < 0x050000
@@ -136,6 +136,7 @@ int main(int argc, char *argv[]) {
     auto a = new swipl_win(argc, argv);
     int rc = a->exec();
     qDebug() << "main loop finished" << rc;
+delete a;
     return rc;
 }
 

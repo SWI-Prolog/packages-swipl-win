@@ -114,21 +114,31 @@ static ConsoleEdit *console_peek_first() {
     }));
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#define PTYPE(p) p.type()
+#define PCLASS QVariant
+#define PSTRING String
+#else
+#define PTYPE(p) QMetaType::Type(p.metaType().id())
+#define PCLASS QMetaType
+#define PSTRING QString
+#endif
+
 /** unify a property of QObject:
  *  allows read/write of simple atomic values
  */
 static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
 
     #define OK return QString()
-
+    auto pt = PTYPE(p);
     switch (v.type()) {
 
     case PL_VARIABLE:
-        switch (p.type()) {
-        case QVariant::Bool:
+        switch (pt) {
+        case PCLASS::Bool:
             v = p.read(o).toBool() ? A("true") : A("false");
             OK;
-        case QVariant::Int:
+        case PCLASS::Int:
             if (p.isEnumType()) {
                 Q_ASSERT(!p.isFlagType());  // TBD
                 QMetaEnum e = p.enumerator();
@@ -139,10 +149,10 @@ static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
             }
             v = long(p.read(o).toInt());
             OK;
-        case QVariant::UInt:
+        case PCLASS::UInt:
             v = long(p.read(o).toUInt());
             OK;
-        case QVariant::String:
+        case PCLASS::PSTRING:
             v = A(p.read(o).toString());
             OK;
         default:
@@ -151,9 +161,9 @@ static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
         break;
 
     case PL_INTEGER:
-        switch (p.type()) {
-        case QVariant::Int:
-        case QVariant::UInt:
+        switch (pt) {
+        case PCLASS::Int:
+        case PCLASS::UInt:
             if (p.write(o, qint32(v)))
                 OK;
         default:
@@ -162,12 +172,12 @@ static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
         break;
 
     case PL_ATOM:
-        switch (p.type()) {
-        case QVariant::String:
+        switch (pt) {
+        case PCLASS::PSTRING:
             if (p.write(o, t2w(v)))
                 OK;
 	    break;
-        case QVariant::Int:
+        case PCLASS::Int:
             if (p.isEnumType()) {
                 Q_ASSERT(!p.isFlagType());  // TBD
                 int i = p.enumerator().keyToValue(v);
@@ -182,8 +192,8 @@ static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
         break;
 
     case PL_FLOAT:
-        switch (p.type()) {
-        case QVariant::Double:
+        switch (pt) {
+        case PCLASS::Double:
             if (p.write(o, double(v)))
                 OK;
         default:
@@ -786,14 +796,15 @@ PREDICATE0(select_ANSI_term_colors) {
  *  just issue termination to Qt application object
  */
 PREDICATE0(quit_console) {
-
     ConsoleEdit* c = console_by_thread();
     if (c) {
         // run on foreground
-        c->exec_func([]() { QApplication::postEvent(qApp, new QCloseEvent); });
+        c->exec_func([=]() {
+        if (auto mw = find_parent<pqMainWindow>(c))
+            QApplication::postEvent(mw, new QCloseEvent);
+        });
         return TRUE;
     }
-
     return FALSE;
 }
 

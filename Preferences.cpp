@@ -91,9 +91,9 @@ Preferences::Preferences(QObject *parent) :
     for (int i = 0; i < 16; ++i) {
         setArrayIndex(i);
         QColor c = value("color", v[i]).value<QColor>();
-	if ( !c.isValid() )	// Play safe if the color is invalid
-	    c = v[i];		// Happens on MacOSX 10.11 (El Captain)
-	ANSI_sequences.append(c);
+        if ( !c.isValid() )	// Play safe if the color is invalid
+            c = v[i];		// Happens on MacOSX 10.11 (El Captain)
+        ANSI_sequences.append(c);
     }
     endArray();
 }

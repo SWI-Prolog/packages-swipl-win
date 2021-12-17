@@ -93,7 +93,7 @@ public slots:
 protected:
 
     /** handle application closing, WRT XPCE termination */
-    virtual void closeEvent(QCloseEvent *event);
+    virtual void closeEvent(QCloseEvent *event) override;
 
     /** when there are more than a console, use a tabbed interface */
     QTabWidget *consoles() const;

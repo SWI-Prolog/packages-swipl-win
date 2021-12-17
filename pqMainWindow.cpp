@@ -49,8 +49,8 @@ inline ConsoleEdit *wid2con(QWidget *w) { return qobject_cast<ConsoleEdit*>(w); 
 pqMainWindow::pqMainWindow(QWidget *parent) :
     QMainWindow(parent) {
 #ifndef __APPLE__
-  QMenuBar *mb = menuBar();
-  mb->setNativeMenuBar(false);
+    QMenuBar *mb = menuBar();
+    mb->setNativeMenuBar(false);
 #endif
 }
 
@@ -91,6 +91,8 @@ void pqMainWindow::closeEvent(QCloseEvent *event) {
 
     if (!SwiPrologEngine::quit_request())
         event->ignore();
+else
+    qApp->quit();
 }
 
 /** pass initialization script to actual interface

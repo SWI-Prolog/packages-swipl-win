@@ -117,14 +117,14 @@ ssize_t SwiPrologEngine::_read_(char *buf, size_t bufsize) {
             if (n > 0) {
                 uint l = bufsize < n ? bufsize : n;
                 memcpy(buf, buffer, l);
-		buffer.remove(0, l);
+                buffer.remove(0, l);
                 return l;
             }
 
             if (target->status == ConsoleEdit::eof) {
-	        target->status = ConsoleEdit::running;
+                target->status = ConsoleEdit::running;
                 return 0;
-	    }
+            }
         }
 
         if (PL_handle_signals() < 0)
@@ -352,9 +352,12 @@ bool SwiPrologEngine::in_thread::named_load(QString n, QString t, bool silent) {
  */
 bool SwiPrologEngine::quit_request() {
     qDebug() << "quit_request; spe = " << spe;
+    /*
     if (spe)
         spe->query_run("halt");
     else
         PL_halt(0);
     return false;
+    */
+    return true;
 }

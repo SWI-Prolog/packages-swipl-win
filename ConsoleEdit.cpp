@@ -319,9 +319,9 @@ void ConsoleEdit::keyPressEvent(QKeyEvent *event) {
         if ((accept = editable) && ctrl)
         #endif
         {   qDebug() << "^D" << thids;
-	    c.movePosition(c.End);
+            c.movePosition(c.End);
             setTextCursor(c);
-	    ret = true;
+            ret = true;
             status = eof;
         }
         break;
@@ -381,8 +381,8 @@ void ConsoleEdit::keyPressEvent(QKeyEvent *event) {
         else
             emit user_input(cmd);
 
-	if ( status != eof || !cmd.isEmpty() )
-	    status = running;
+        if ( status != eof || !cmd.isEmpty() )
+            status = running;
     }
 }
 
@@ -882,7 +882,6 @@ void ConsoleEdit::add_history_line(QString line)
 void ConsoleEdit::eng_completed() {
     if (eng) {
         eng = 0;
-        // qApp->quit();
         QApplication::postEvent(qApp, new QCloseEvent);
     }
     else if (io) {

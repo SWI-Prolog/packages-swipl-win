@@ -50,13 +50,13 @@ bool swipl_win::event(QEvent *event) {
     case QEvent::FileOpen:
       { QString name = static_cast<QFileOpenEvent *>(event)->file();
 
-	qDebug() << "FileOpen: " << name;
+        qDebug() << "FileOpen: " << name;
         SwiPrologEngine::in_thread _it;
-	try {
-	    PlCall("prolog", "file_open_event", PlTermv(name.toStdWString().data()));
-	} catch(PlException e) {
-	    qDebug() << CCP(e);
-	}
+        try {
+            PlCall("prolog", "file_open_event", PlTermv(name.toStdWString().data()));
+        } catch(PlException e) {
+            qDebug() << CCP(e);
+        }
         return true;
       }
     default:

@@ -130,10 +130,10 @@ bool Completion::setup() {
         SwiPrologEngine::in_thread _e;
         try {
             if ( PlCall("load_files(library(console_input), [silent(true)])") &&
-		 PlCall("current_predicate(prolog:complete_input/4)")) {
-	        setup_status = available;
-	    }
+                 PlCall("current_predicate(prolog:complete_input/4)")) {
+            setup_status = available;
         }
+    }
         catch(PlException e) {
 //            qDebug() << CCP(e);
         }
@@ -146,6 +146,7 @@ bool Completion::setup() {
  * FIXME: Base tooltip on a callback
  */
 QString Completion::pred_tip(QTextCursor c) {
+    Q_UNUSED(c)
 #if 0
     if (helpidx_status == available) {
         c.select(c.WordUnderCursor);

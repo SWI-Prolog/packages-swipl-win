@@ -100,6 +100,9 @@ protected:
 
     /** route menus to prolog */
     QSignalMapper *menu2pl = nullptr;
+
+private:
+    QSignalMapper* menuMapper(ConsoleEdit *ce);
 };
 
 /** utility to lookup a typed parent in hierarchy */

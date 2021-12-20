@@ -185,32 +185,35 @@ void pqMainWindow::remConsole(ConsoleEdit *c) {
 /** handle menu dispatch by means of Qt signal mapper
  */
 void pqMainWindow::addActionPq(ConsoleEdit *ce, QMenu *cmmenu, QString label, QString action) {
-    if (!menu2pl) {
-        menu2pl = new QSignalMapper;
-        connect(menu2pl, &QSignalMapper::mappedString, ce, &ConsoleEdit::onConsoleMenuActionMap);
-    }
-
     // dispatch signals indexed
-    QAction *a = cmmenu->addAction(label, menu2pl, SLOT(map()));
+    QAction *a = cmmenu->addAction(label, menuMapper(ce), SLOT(map()));
     menu2pl->setMapping(a, action);
 }
 
 /** ditto
  */
 QAction* pqMainWindow::add_action(ConsoleEdit *ce, QMenu *mn, QString Label, QString ctxtmod, QString Goal, QAction *before) {
-    if (!menu2pl) {
-        menu2pl = new QSignalMapper;
-        connect(menu2pl, &QSignalMapper::mappedString, ce, &ConsoleEdit::onConsoleMenuActionMap);
-    }
-
     QAction *a;
     if (!before)
-        a = mn->addAction(Label, menu2pl, SLOT(map()));
+        a = mn->addAction(Label, menuMapper(ce), SLOT(map()));
     else {
         mn->insertAction(before, a = new QAction(Label, mn));
-        connect(a, SIGNAL(triggered()), menu2pl, SLOT(map()));
+        connect(a, SIGNAL(triggered()), menuMapper(ce), SLOT(map()));
     }
     menu2pl->setMapping(a, ctxtmod + ':' + Goal);
-
     return a;
+}
+
+/** 20/12/2021 - factorize code subject to Qt versioning
+ */
+QSignalMapper* pqMainWindow::menuMapper(ConsoleEdit *ce) {
+    if (!menu2pl) {
+        menu2pl = new QSignalMapper;
+#if QT_VERSION < 0x051500
+        connect(menu2pl, SIGNAL(mapped(const QString &)), ce, SLOT(onConsoleMenuActionMap(const QString &)));
+#else
+        connect(menu2pl, &QSignalMapper::mappedString, ce, &ConsoleEdit::onConsoleMenuActionMap);
+#endif
+    }
+    return menu2pl;
 }

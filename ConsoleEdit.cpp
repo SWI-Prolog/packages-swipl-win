@@ -692,13 +692,6 @@ QString ConsoleEdit::titleLabel() {
 /** attempt to gracefully stop XPCE thread
  */
 bool ConsoleEdit::can_close() {
-    if (eng && is_running()) {
-        QMessageBox b(this);
-        b.setText(tr("[%1] is running a query.\nQuit anyway ?").arg(titleLabel())); //thread_id()
-        b.setStandardButtons(b.Yes|b.No);
-        b.setIcon(b.Question);
-        return b.exec() == b.Yes;
-    }
     return true;
 }
 

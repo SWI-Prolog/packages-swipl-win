@@ -35,7 +35,7 @@
 #define PQTERM_H
 
 #include "pqConsole_global.h"
-#include <SWI-cpp.h>
+#include <SWI-cpp2.h>
 #include <QVariant>
 
 #define X PQCONSOLESHARED_EXPORT

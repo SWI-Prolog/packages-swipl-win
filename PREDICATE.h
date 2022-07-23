@@ -34,7 +34,7 @@
 #ifndef PREDICATE_H
 #define PREDICATE_H
 
-#include <SWI-cpp.h>
+#include <SWI-cpp2.h>
 
 #ifndef NO_SHORTEN_INTERFACE
 
@@ -46,7 +46,7 @@ typedef const void* CVP;
 
 #include <QString>
 
-inline CCP S(const PlTerm &T) { return T; }
+#define CCP(T) ((T).as_string().c_str())
 
 inline PlAtom W(const QString &s) {
     return PlAtom(s.toStdWString().data());
@@ -56,13 +56,13 @@ inline PlAtom A(QString s) {
 }
 
 inline QString t2w(PlTerm t) {
-    return QString::fromWCharArray(WCP(t));
+    return QString::fromWCharArray(WCP(t.as_wstring().c_str()));
 }
 
 inline QString serialize(PlTerm t) {
     wchar_t *s;
 
-    if ( PL_get_wchars(t, NULL, &s, CVT_WRITEQ|BUF_RING) )
+    if ( PL_get_wchars(t.C_, NULL, &s, CVT_WRITEQ|BUF_RING) )
       return QString::fromWCharArray(s);
 
     throw PlTypeError("text", t);
@@ -71,10 +71,10 @@ inline QString serialize(PlTerm t) {
 typedef PlTerm T;
 typedef PlTermv V;
 typedef PlCompound C;
-typedef PlTail L;
+typedef PlTerm_tail L;
 
 /** get back an object passed by pointer to Prolog */
-template<typename Obj> Obj* pq_cast(T ptr) { return static_cast<Obj*>(static_cast<void*>(ptr)); }
+template<typename Obj> Obj* pq_cast(T ptr) { return static_cast<Obj*>(ptr.as_pointer()); }
 
 #endif
 

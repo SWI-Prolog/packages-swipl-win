@@ -32,7 +32,7 @@
 */
 
 #include <SWI-Stream.h>
-#include <SWI-cpp.h>
+#include <SWI-cpp2.h>
 #include "SwiPrologEngine.h"
 #include "PREDICATE.h"
 
@@ -149,7 +149,7 @@ void SwiPrologEngine::serve_query(query p) {
             emit query_complete(t, occurrences);
         }
         else {
-            PlQuery q(A(n), "call", PlTermv(PlCompound(t.toUtf8())));
+          PlQuery q(A(n).as_string(), "call", PlTermv(PlCompound(t.toUtf8()))); // TODO: as_wstring()?
             //PlQuery q(A(n), "call", PlTermv(PlCompound(t.toStdWString().data())));
             int occurrences = 0;
             while (q.next_solution())
@@ -252,8 +252,9 @@ void SwiPrologEngine::run() {
     spe = 0;
     */
 
-    {   PlTerm color_term;
-        if (PlCall("current_prolog_flag", PlTermv("color_term", color_term)) && color_term == "false")
+    {   PlTerm_var color_term;
+        if (PlCall("current_prolog_flag", PlTermv(PlTerm_atom("color_term"), color_term)) &&
+              color_term.as_string() == "false")
             target->color_term = false;
     }
 
@@ -328,15 +329,15 @@ SwiPrologEngine::in_thread::~in_thread() {
  */
 bool SwiPrologEngine::in_thread::named_load(QString n, QString t, bool silent) {
     try {
-        PlTerm cs, s, opts;
-        if (    PlCall("atom_codes", PlTermv(A(t), cs)) &&
+        PlTerm_var cs, s, opts;
+        if (    PlCall("atom_codes", PlTermv(PlTerm_atom(A(t)), cs)) &&
                 PlCall("open_chars_stream", PlTermv(cs, s))) {
-            PlTail l(opts);
+            PlTerm_tail l(opts);
             l.append(PlCompound("stream", PlTermv(s)));
             if (silent)
                 l.append(PlCompound("silent", PlTermv(A("true"))));
             l.close();
-            bool rc = PlCall("load_files", PlTermv(A(n), opts));
+            bool rc = PlCall("load_files", PlTermv(PlTerm_atom(A(n)), opts));
             PlCall("close", PlTermv(s));
             return rc;
         }

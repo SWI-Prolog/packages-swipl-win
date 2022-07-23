@@ -44,13 +44,13 @@ Swipl_IO::Swipl_IO(QObject *parent) :
 
 /** fill the buffer */
 ssize_t Swipl_IO::_read_f(void *handle, char *buf, size_t bufsize) {
-    auto e = pq_cast<Swipl_IO>(handle);
+    auto e = pq_cast<Swipl_IO>(PlTerm_pointer(handle));
     return e->_read_(buf, bufsize);
 }
 
 /** empty the buffer */
 ssize_t Swipl_IO::_write_f(void *handle, char* buf, size_t bufsize) {
-    auto e = pq_cast<Swipl_IO>(handle);
+    auto e = pq_cast<Swipl_IO>(PlTerm_pointer(handle));
     if (e->target) {
         emit e->user_output(QString::fromUtf8(buf, bufsize));
         e->flush();
@@ -170,7 +170,7 @@ void Swipl_IO::take_input(QString cmd) {
 }
 
 void Swipl_IO::eng_at_exit(void *p) {
-    auto e = pq_cast<Swipl_IO>(p);
+    auto e = pq_cast<Swipl_IO>(PlTerm_pointer(p));
     emit e->sig_eng_at_exit();
 }
 

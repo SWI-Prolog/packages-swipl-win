@@ -39,7 +39,7 @@
 #include <QTextStream>
 
 struct Bin : C { Bin(CCP op, T Left, T Right) : C(op, V(Left, Right)) {} };
-struct Uni : C { Uni(CCP op, T arg) : C(op, arg) {} };
+struct Uni : C { Uni(CCP op, T arg) : C(op, PlTermv(arg)) {} };
 
 struct quv : Bin { quv(T Var, T Expr) : Bin("^", Var, Expr) {} };
 struct mod : Bin { mod(T Mod, T Pred) : Bin(":", Mod, Pred) {} };
@@ -47,9 +47,7 @@ struct neg : Uni { neg(T pred) : Uni("\\+", pred) {} };
 struct join : Bin { join(T Left, T Right) : Bin(",", Left, Right) {} };
 struct arith : Bin { arith(T Pred, T Num) : Bin("/", Pred, Num) {} };
 
-#define zero long(0)
-#define one long(1)
-#define _V T()
+#define _V PlTerm_var()
 
 /** context sensitive completion
  *  take current line, give list of completions (both atoms and files)
@@ -66,16 +64,16 @@ QString Completion::initialize(int promptPosition, QTextCursor c, QStringList &s
 
         c.setPosition(promptPosition, c.KeepAnchor);
         QString left = c.selectedText();
-        PlString Before(left.toStdWString().data());
+        PlTerm_string Before(left.toStdWString());
 
         c.setPosition(p);
         c.movePosition(c.EndOfLine, c.KeepAnchor);
         QString after = c.selectedText();
-        PlString After(after.toStdWString().data());
+        PlTerm_string After(after.toStdWString());
 
-        PlTerm Completions, Delete, word;
+        PlTerm_var Completions, Delete, word;
         if (PlCall("prolog", "complete_input", PlTermv(Before, After, Delete, Completions))) {
-            PlTail l(Completions); // cautiously make an explicit call to close
+            PlTerm_tail l(Completions); // cautiously make an explicit call to close
             while (l.next(word))
                 strings.append(t2w(word));
             l.close();
@@ -101,18 +99,19 @@ void Completion::initialize(QStringList &strings) {
 
     SwiPrologEngine::in_thread _int;
     try {
-        PlTerm p,m,a,l,v;
+        PlTerm_var p,m,a,l,v;
         PlQuery q("setof",
             PlTermv(p,
                 quv(m,
                     quv(a,
-                        join(PlCompound("current_predicate", mod(m, arith(p, a))),
-                            neg(C("sub_atom", PlTermv(p, zero, one, _V, A("$"))))
+                        join(PlCompound("current_predicate", PlTermv(mod(m, arith(p, a)))),
+                             neg(C("sub_atom", PlTermv(p, PlTerm_integer(0), PlTerm_integer(1),
+                                                       _V, PlTerm_atom(A("$")))))
                 ))),
             l));
         if (q.next_solution())
-            for (PlTail x(l); x.next(v); )
-                strings.append(CCP(v));
+            for (PlTerm_tail x(l); x.next(v); )
+              strings.append(v.as_string().c_str());
     }
     catch(PlException e) {
         qDebug() << CCP(e);

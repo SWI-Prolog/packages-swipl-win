@@ -136,24 +136,24 @@ static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
     case PL_VARIABLE:
         switch (pt) {
         case PCLASS::Bool:
-            v = p.read(o).toBool() ? A("true") : A("false");
+            PlCheck(v.unify_atom(p.read(o).toBool() ? A("true") : A("false")));
             OK;
         case PCLASS::Int:
             if (p.isEnumType()) {
                 Q_ASSERT(!p.isFlagType());  // TBD
                 QMetaEnum e = p.enumerator();
                 if (CCP key = e.valueToKey(p.read(o).toInt())) {
-                    v = A(key);
+                    PlCheck(v.unify_atom(A(key)));
                     OK;
                 }
             }
-            v = long(p.read(o).toInt());
+            PlCheck(v.unify_integer(p.read(o).toInt()));
             OK;
         case PCLASS::UInt:
-            v = long(p.read(o).toUInt());
+            PlCheck(v.unify_integer(p.read(o).toUInt()));
             OK;
         case PCLASS::PSTRING:
-            v = A(p.read(o).toString());
+            PlCheck(v.unify_atom(A(p.read(o).toString())));
             OK;
         default:
             break;
@@ -164,7 +164,7 @@ static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
         switch (pt) {
         case PCLASS::Int:
         case PCLASS::UInt:
-            if (p.write(o, qint32(v)))
+            if (p.write(o, qint32(v.as_int())))
                 OK;
         default:
             break;
@@ -180,7 +180,7 @@ static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
         case PCLASS::Int:
             if (p.isEnumType()) {
                 Q_ASSERT(!p.isFlagType());  // TBD
-                int i = p.enumerator().keyToValue(v);
+                int i = p.enumerator().keyToValue(v.as_string().c_str()); // TODO: wstring()
                 if (i != -1) {
                     p.write(o, i);
                     OK;
@@ -194,7 +194,7 @@ static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
     case PL_FLOAT:
         switch (pt) {
         case PCLASS::Double:
-            if (p.write(o, double(v)))
+            if (p.write(o, v.as_double()))
                 OK;
         default:
             break;
@@ -228,7 +228,7 @@ PREDICATE(window_title, 2) {
     if (c) {
         QWidget *w = c->parentWidget();
         if (qobject_cast<QMainWindow*>(w)) {
-            PL_A1 = A(w->windowTitle());
+            PlCheck(PL_A1.unify_atom(A(w->windowTitle())));
             w->setWindowTitle(t2w(PL_A2));
             return TRUE;
         }
@@ -253,19 +253,19 @@ PREDICATE(win_window_pos, 1) {
     if (!w)
         return FALSE;
 
-    T opt;
+    PlTerm_var opt;
     L options(PL_A1);
     typedef QPair<int, QString> O;
     while (options.next(opt)) {
         O o = O(opt.arity(), opt.name());
         if (o == O(2, "size")) {
-            long W = opt[1], H = opt[2];
+            long W = opt[1].as_long(), H = opt[2].as_long();
             QSize sz = c->fontMetrics().size(0, "Q");
             w->resize(sz.width() * W, sz.height() * H);
             continue;
         }
         if (o == O(2, "position")) {
-            long X = opt[1], Y = opt[2];
+            long X = opt[1].as_long(), Y = opt[2].as_long();
             w->move(X, Y);
             continue;
         }
@@ -349,8 +349,8 @@ PREDICATE(win_insert_menu_item, 4) {
             PL_A4.type() == PL_LIST */ )
         {
             Label = t2w(PL_A2[1]);
-            PlTail labels(PL_A2[2]), actions(PL_A4);
-            PlTerm label, action;
+            PlTerm_tail labels(PL_A2[2]), actions(PL_A4);
+            PlTerm_var label, action;
             while (labels.next(label) && actions.next(action))
                 lab_act.append(qMakePair(t2w(label), t2w(action)));
         }
@@ -368,7 +368,7 @@ PREDICATE(win_insert_menu_item, 4) {
         if (Label == "&Navigator ...")
             Label = "Na&vigator ...";
 
-        QString ctxtmod = t2w(PlAtom(PL_module_name(PL_context())));
+        QString ctxtmod = t2w(PlTerm_atom(PlAtom(PL_module_name(PL_context()))));
         // if (PlCall("context_module", cx)) ctxtmod = t2w(cx); -- same as above: system
         ctxtmod = "win_menu";
 
@@ -490,9 +490,9 @@ PREDICATE(win_open_console, 5) {
 
     ce->new_console(c, t2w(PL_A1));
 
-    if (!PL_unify_stream(PL_A2, in) ||
-        !PL_unify_stream(PL_A3, out) ||
-        !PL_unify_stream(PL_A4, err)) {
+    if (!PL_unify_stream(PL_A2.C_, in) ||
+        !PL_unify_stream(PL_A3.C_, out) ||
+        !PL_unify_stream(PL_A4.C_, err)) {
             Sclose(in);
             Sclose(out);
             Sclose(err);
@@ -507,7 +507,7 @@ PREDICATE(win_open_console, 5) {
 PREDICATE(rl_add_history, 1) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        WCP line = PL_A1;
+        WCP line = PL_A1.as_wstring().c_str();
         if (*line)
             c->add_history_line(QString::fromWCharArray(line));
         return TRUE;
@@ -527,9 +527,9 @@ PREDICATE(rl_read_init_file, 1) {
 NAMED_PREDICATE("$rl_history", rl_history, 1) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        PlTail lines(PL_A1);
+        PlTerm_tail lines(PL_A1);
         foreach(QString x, c->history_lines())
-            lines.append(W(x));
+            lines.append(PlTerm_atom(W(x)));
         lines.close();
         return TRUE;
     }
@@ -544,8 +544,8 @@ PREDICATE(tty_size, 2) {
         QSize sz = c->fontMetrics().size(0, "Q");
         long Rows = c->height() / sz.height();
         long Cols = c->width() / sz.width();
-        PL_A1 = Rows;
-        PL_A2 = Cols;
+        PlCheck(PL_A1.unify_integer(Rows));
+        PlCheck(PL_A2.unify_integer(Cols));
         return TRUE;
     }
     return FALSE;
@@ -575,26 +575,26 @@ PREDICATE(win_message_box, 2) {
         QString Text = t2w(PL_A1);
 
         QString Title = "swipl-win", Image;
-        PlTerm Icon; //QMessageBox::Icon Icon = QMessageBox::NoIcon;
+        PlTerm_var Icon; //QMessageBox::Icon Icon = QMessageBox::NoIcon;
 
         // scan options
         float scale = 0;
-        PlTerm Option;
+        PlTerm_var Option;
         int min_width = 0;
 
-        for (PlTail t(PL_A2); t.next(Option); )
+        for (PlTerm_tail t(PL_A2); t.next(Option); )
             if (Option.arity() == 1) {
                 QString name = Option.name();
                 if (name == "title")
                     Title = t2w(Option[1]);
                 if (name == "icon")
-                    Icon = Option[1];
+                    PlCheck(Icon.unify_term(Option[1]));
                 if (name == "image")
                     Image = t2w(Option[1]);
                 if (name == "image_scale")
-                    scale = double(Option[1]);
+                    scale = Option[1].as_double();
                 if (name == "min_width")
-                    min_width = int(Option[1]);
+                    min_width = Option[1].as_int();
             }
             else
                 throw PlException(A(c->tr("option %1 : invalid arity").arg(t2w(Option))));
@@ -676,8 +676,8 @@ PREDICATE(console_settings, 1) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
         PlFrame fr;
-        PlTerm opt;
-        for (PlTail opts(PL_A1); opts.next(opt); ) {
+        PlTerm_var opt;
+        for (PlTerm_tail opts(PL_A1); opts.next(opt); ) {
             if (opt.arity() == 1)
                 unify(opt.name(), c, opt[1]);
             else
@@ -708,7 +708,7 @@ PREDICATE(getOpenFileName, 4) {
         s.stop();
 
         if (!Choice.isEmpty()) {
-            PL_A4 = A(Choice);
+            PlCheck(PL_A4.unify_atom(A(Choice)));
             return TRUE;
         }
     }
@@ -734,7 +734,7 @@ PREDICATE(getSaveFileName, 4) {
         s.stop();
 
         if (!Choice.isEmpty()) {
-            PL_A4 = A(Choice);
+            PlCheck(PL_A4.unify_atom(A(Choice)));
             return TRUE;
         }
     }
@@ -843,9 +843,9 @@ PREDICATE0(paste) {
  */
 PREDICATE(win_preference_groups, 1) {
     Preferences p;
-    PlTail l(PL_A1);
+    PlTerm_tail l(PL_A1);
     foreach (auto g, p.childGroups())
-        l.append(A(g));
+        l.append(PlTerm_atom(A(g)));
     l.close();
     return TRUE;
 }
@@ -854,9 +854,9 @@ PREDICATE(win_preference_groups, 1) {
  */
 PREDICATE(win_preference_keys, 2) {
     Preferences p;
-    PlTail l(PL_A1);
+    PlTerm_tail l(PL_A1);
     foreach (auto k, p.childKeys())
-        l.append(A(k));
+        l.append(PlTerm_atom(A(k)));
     l.close();
     return TRUE;
 }
@@ -872,7 +872,7 @@ PREDICATE(win_current_preference, 3) {
     p.beginGroup(g);
     if (p.contains(k)) {
         auto x = p.value(k).toString();
-        return PL_A3 = PlCompound(x.toStdWString().data());
+        return PL_A3.unify_term(PlCompound(x.toStdWString()));
     }
 
     return FALSE;
@@ -917,7 +917,7 @@ PREDICATE(win_window_color, 2) {
     if (c) {
         PlTerm rgb = PL_A2;
         if (rgb.name() == QStringLiteral("rgb")) {
-            int r = rgb[1], g = rgb[2], b = rgb[3];
+            int r = rgb[1].as_int(), g = rgb[2].as_int(), b = rgb[3].as_int();
             QRgb val = qRgb(r, g, b);
             auto which = t2w(PL_A1);
 

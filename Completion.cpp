@@ -59,34 +59,34 @@ QString Completion::initialize(int promptPosition, QTextCursor c, QStringList &s
     QString rets;
 
     try {
-        int p = c.position();
-        Q_ASSERT(p >= promptPosition);
+	int p = c.position();
+	Q_ASSERT(p >= promptPosition);
 
-        c.setPosition(promptPosition, c.KeepAnchor);
-        QString left = c.selectedText();
-        PlTerm_string Before(left.toStdWString());
+	c.setPosition(promptPosition, c.KeepAnchor);
+	QString left = c.selectedText();
+	PlTerm_string Before(left.toStdWString());
 
-        c.setPosition(p);
-        c.movePosition(c.EndOfLine, c.KeepAnchor);
-        QString after = c.selectedText();
-        PlTerm_string After(after.toStdWString());
+	c.setPosition(p);
+	c.movePosition(c.EndOfLine, c.KeepAnchor);
+	QString after = c.selectedText();
+	PlTerm_string After(after.toStdWString());
 
-        PlTerm_var Completions, Delete, word;
-        if (PlCall("prolog", "complete_input", PlTermv(Before, After, Delete, Completions))) {
-            PlTerm_tail l(Completions); // cautiously make an explicit call to close
-            while (l.next(word))
-                strings.append(t2w(word));
-            l.close();
-        }
+	PlTerm_var Completions, Delete, word;
+	if (PlCall("prolog", "complete_input", PlTermv(Before, After, Delete, Completions))) {
+	    PlTerm_tail l(Completions); // cautiously make an explicit call to close
+	    while (l.next(word))
+		strings.append(t2w(word));
+	    PlCheck(l.close());
+	}
 
-        c.setPosition(p);
-        rets = t2w(Delete);
+	c.setPosition(p);
+	rets = t2w(Delete);
     }
     catch(PlException e) {
-        qDebug() << CCP(e);
+	qDebug() << CCP(e);
     }
     catch(...) {
-        qDebug() << "SIGV";
+	qDebug() << "SIGV";
     }
 
     return rets;
@@ -99,22 +99,22 @@ void Completion::initialize(QStringList &strings) {
 
     SwiPrologEngine::in_thread _int;
     try {
-        PlTerm_var p,m,a,l,v;
-        PlQuery q("setof",
-            PlTermv(p,
-                quv(m,
-                    quv(a,
-                        join(PlCompound("current_predicate", PlTermv(mod(m, arith(p, a)))),
-                             neg(C("sub_atom", PlTermv(p, PlTerm_integer(0), PlTerm_integer(1),
-                                                       _V, PlTerm_atom(A("$")))))
-                ))),
-            l));
-        if (q.next_solution())
-            for (PlTerm_tail x(l); x.next(v); )
-              strings.append(v.as_string().c_str());
+	PlTerm_var p,m,a,l,v;
+	PlQuery q("setof",
+	    PlTermv(p,
+		quv(m,
+		    quv(a,
+			join(PlCompound("current_predicate", PlTermv(mod(m, arith(p, a)))),
+			     neg(C("sub_atom", PlTermv(p, PlTerm_integer(0), PlTerm_integer(1),
+						       _V, PlTerm_atom(A("$")))))
+		))),
+	    l));
+	if (q.next_solution())
+	    for (PlTerm_tail x(l); x.next(v); )
+	      strings.append(v.as_string().c_str());
     }
     catch(PlException e) {
-        qDebug() << CCP(e);
+	qDebug() << CCP(e);
     }
 }
 
@@ -125,17 +125,17 @@ Completion::t_pred_docs Completion::pred_docs;
  */
 bool Completion::setup() {
     if (setup_status == untried) {
-        setup_status = missing;
-        SwiPrologEngine::in_thread _e;
-        try {
-            if ( PlCall("load_files(library(console_input), [silent(true)])") &&
-                 PlCall("current_predicate(prolog:complete_input/4)")) {
-            setup_status = available;
-        }
+	setup_status = missing;
+	SwiPrologEngine::in_thread _e;
+	try {
+	    if ( PlCall("load_files(library(console_input), [silent(true)])") &&
+		 PlCall("current_predicate(prolog:complete_input/4)")) {
+	    setup_status = available;
+	}
     }
-        catch(PlException e) {
+	catch(PlException e) {
 //            qDebug() << CCP(e);
-        }
+	}
     }
 
     return setup_status == available;
@@ -148,15 +148,15 @@ QString Completion::pred_tip(QTextCursor c) {
     Q_UNUSED(c)
 #if 0
     if (helpidx_status == available) {
-        c.select(c.WordUnderCursor);
-        QString w =  c.selectedText();
-        auto p = pred_docs.constFind(w);
-        if (p != pred_docs.end()) {
-            QStringList l;
-            foreach(auto x, p.value())
-                l.append(QString("%1/%2:%3").arg(w).arg(x.first).arg(x.second));
-            return l.join("\n");
-        }
+	c.select(c.WordUnderCursor);
+	QString w =  c.selectedText();
+	auto p = pred_docs.constFind(w);
+	if (p != pred_docs.end()) {
+	    QStringList l;
+	    foreach(auto x, p.value())
+		l.append(QString("%1/%2:%3").arg(w).arg(x.first).arg(x.second));
+	    return l.join("\n");
+	}
     }
 #endif
     return "";

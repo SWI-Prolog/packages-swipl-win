@@ -80,16 +80,16 @@ pqConsole::pqConsole() {
  */
 static QWidget *search_widget(std::function<bool(QWidget* w)> match) {
     foreach (auto widget, QApplication::topLevelWidgets()) {
-        QStack<QObject*> s;
-        s.push(widget);
-        while (!s.isEmpty()) {
-            auto p = qobject_cast<QWidget*>(s.pop());
-            if (match(p))
-                return p;
-            foreach (auto c, p->children())
-                if (c->isWidgetType())
-                    s.push(c);
-        }
+	QStack<QObject*> s;
+	s.push(widget);
+	while (!s.isEmpty()) {
+	    auto p = qobject_cast<QWidget*>(s.pop());
+	    if (match(p))
+		return p;
+	    foreach (auto c, p->children())
+		if (c->isWidgetType())
+		    s.push(c);
+	}
     }
     return 0;
 }
@@ -100,9 +100,9 @@ static QWidget *search_widget(std::function<bool(QWidget* w)> match) {
 static ConsoleEdit *console_by_thread() {
     int thid = PL_thread_self();
     return qobject_cast<ConsoleEdit*>(search_widget([=](QWidget* p) {
-        if (auto ce = qobject_cast<ConsoleEdit*>(p))
-            return ce->match_thread(thid);
-        return false;
+	if (auto ce = qobject_cast<ConsoleEdit*>(p))
+	    return ce->match_thread(thid);
+	return false;
     }));
 }
 
@@ -110,7 +110,7 @@ static ConsoleEdit *console_by_thread() {
  */
 static ConsoleEdit *console_peek_first() {
     return qobject_cast<ConsoleEdit*>(search_widget([](QWidget* p) {
-        return qobject_cast<ConsoleEdit*>(p) != 0;
+	return qobject_cast<ConsoleEdit*>(p) != 0;
     }));
 }
 
@@ -134,75 +134,75 @@ static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
     switch (v.type()) {
 
     case PL_VARIABLE:
-        switch (pt) {
-        case PCLASS::Bool:
-            PlCheck(v.unify_atom(p.read(o).toBool() ? A("true") : A("false")));
-            OK;
-        case PCLASS::Int:
-            if (p.isEnumType()) {
-                Q_ASSERT(!p.isFlagType());  // TBD
-                QMetaEnum e = p.enumerator();
-                if (CCP key = e.valueToKey(p.read(o).toInt())) {
-                    PlCheck(v.unify_atom(A(key)));
-                    OK;
-                }
-            }
-            PlCheck(v.unify_integer(p.read(o).toInt()));
-            OK;
-        case PCLASS::UInt:
-            PlCheck(v.unify_integer(p.read(o).toUInt()));
-            OK;
-        case PCLASS::PSTRING:
-            PlCheck(v.unify_atom(A(p.read(o).toString())));
-            OK;
-        default:
-            break;
-        }
-        break;
+	switch (pt) {
+	case PCLASS::Bool:
+	    PlCheck(v.unify_atom(p.read(o).toBool() ? A("true") : A("false")));
+	    OK;
+	case PCLASS::Int:
+	    if (p.isEnumType()) {
+		Q_ASSERT(!p.isFlagType());  // TBD
+		QMetaEnum e = p.enumerator();
+		if (CCP key = e.valueToKey(p.read(o).toInt())) {
+		    PlCheck(v.unify_atom(A(key)));
+		    OK;
+		}
+	    }
+	    PlCheck(v.unify_integer(p.read(o).toInt()));
+	    OK;
+	case PCLASS::UInt:
+	    PlCheck(v.unify_integer(p.read(o).toUInt()));
+	    OK;
+	case PCLASS::PSTRING:
+	    PlCheck(v.unify_atom(A(p.read(o).toString())));
+	    OK;
+	default:
+	    break;
+	}
+	break;
 
     case PL_INTEGER:
-        switch (pt) {
-        case PCLASS::Int:
-        case PCLASS::UInt:
-            if (p.write(o, qint32(v.as_int())))
-                OK;
-        default:
-            break;
-        }
-        break;
+	switch (pt) {
+	case PCLASS::Int:
+	case PCLASS::UInt:
+	    if (p.write(o, qint32(v.as_int())))
+		OK;
+	default:
+	    break;
+	}
+	break;
 
     case PL_ATOM:
-        switch (pt) {
-        case PCLASS::PSTRING:
-            if (p.write(o, t2w(v)))
-                OK;
+	switch (pt) {
+	case PCLASS::PSTRING:
+	    if (p.write(o, t2w(v)))
+		OK;
 	    break;
-        case PCLASS::Int:
-            if (p.isEnumType()) {
-                Q_ASSERT(!p.isFlagType());  // TBD
-                int i = p.enumerator().keyToValue(v.as_string().c_str()); // TODO: wstring()
-                if (i != -1) {
-                    p.write(o, i);
-                    OK;
-                }
-            }
-        default:
-            break;
-        }
-        break;
+	case PCLASS::Int:
+	    if (p.isEnumType()) {
+		Q_ASSERT(!p.isFlagType());  // TBD
+		int i = p.enumerator().keyToValue(v.as_string().c_str()); // TODO: wstring()
+		if (i != -1) {
+		    p.write(o, i);
+		    OK;
+		}
+	    }
+	default:
+	    break;
+	}
+	break;
 
     case PL_FLOAT:
-        switch (pt) {
-        case PCLASS::Double:
-            if (p.write(o, v.as_double()))
-                OK;
-        default:
-            break;
-        }
-        break;
+	switch (pt) {
+	case PCLASS::Double:
+	    if (p.write(o, v.as_double()))
+		OK;
+	default:
+	    break;
+	}
+	break;
 
     default:
-        break;
+	break;
     }
 
     return o->tr("property %1: type mismatch").arg(p.name());
@@ -214,7 +214,7 @@ static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
 static QString unify(CCP name, QObject *o, PlTerm v) {
     int pid = o->metaObject()->indexOfProperty(name);
     if (pid >= 0)
-        return unify(o->metaObject()->property(pid), o, v);
+	return unify(o->metaObject()->property(pid), o, v);
     return o->tr("property %1: not found").arg(name);
 }
 
@@ -226,12 +226,12 @@ static QString unify(CCP name, QObject *o, PlTerm v) {
 PREDICATE(window_title, 2) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        QWidget *w = c->parentWidget();
-        if (qobject_cast<QMainWindow*>(w)) {
-            PlCheck(PL_A1.unify_atom(A(w->windowTitle())));
-            w->setWindowTitle(t2w(PL_A2));
-            return TRUE;
-        }
+	QWidget *w = c->parentWidget();
+	if (qobject_cast<QMainWindow*>(w)) {
+	    PlCheck(PL_A1.unify_atom(A(w->windowTitle())));
+	    w->setWindowTitle(t2w(PL_A2));
+	    return TRUE;
+	}
     }
     return FALSE;
 }
@@ -247,48 +247,48 @@ PREDICATE(window_title, 2) {
 PREDICATE(win_window_pos, 1) {
     ConsoleEdit* c = console_by_thread();
     if (!c)
-        return FALSE;
+	return FALSE;
 
     QWidget *w = c->parentWidget();
     if (!w)
-        return FALSE;
+	return FALSE;
 
     PlTerm_var opt;
     L options(PL_A1);
     typedef QPair<int, QString> O;
     while (options.next(opt)) {
-        O o = O(opt.arity(), opt.name().as_string(EncUTF8).c_str());
-        if (o == O(2, "size")) {
-            long W = opt[1].as_long(), H = opt[2].as_long();
-            QSize sz = c->fontMetrics().size(0, "Q");
-            w->resize(sz.width() * W, sz.height() * H);
-            continue;
-        }
-        if (o == O(2, "position")) {
-            long X = opt[1].as_long(), Y = opt[2].as_long();
-            w->move(X, Y);
-            continue;
-        }
-        if (o == O(1, "zorder")) {
-            // TBD ...
-            // long ZOrder = opt[1];
-            continue;
-        }
-        if (o == O(1, "show")) {
-          bool y = QString(opt[1].name().as_string(EncUTF8).c_str()) == "true";
-            if (y)
-                w->show();
-            else
-                w->hide();
-            continue;
-        }
-        if (o == O(0, "activate")) {
-            w->activateWindow();
-            continue;
-        }
+	O o = O(opt.arity(), opt.name().as_string(EncUTF8).c_str());
+	if (o == O(2, "size")) {
+	    long W = opt[1].as_long(), H = opt[2].as_long();
+	    QSize sz = c->fontMetrics().size(0, "Q");
+	    w->resize(sz.width() * W, sz.height() * H);
+	    continue;
+	}
+	if (o == O(2, "position")) {
+	    long X = opt[1].as_long(), Y = opt[2].as_long();
+	    w->move(X, Y);
+	    continue;
+	}
+	if (o == O(1, "zorder")) {
+	    // TBD ...
+	    // long ZOrder = opt[1];
+	    continue;
+	}
+	if (o == O(1, "show")) {
+	  bool y = QString(opt[1].name().as_string(EncUTF8).c_str()) == "true";
+	    if (y)
+		w->show();
+	    else
+		w->hide();
+	    continue;
+	}
+	if (o == O(0, "activate")) {
+	    w->activateWindow();
+	    continue;
+	}
 
-        // print_error
-        return FALSE;
+	// print_error
+	return FALSE;
     }
 
     return TRUE;
@@ -310,26 +310,26 @@ PREDICATE0(win_has_menu) {
  */
 PREDICATE(win_insert_menu, 2) {
     if (ConsoleEdit *ce = console_by_thread()) {
-        QString Label = t2w(PL_A1), Before = t2w(PL_A2);
-        ce->exec_func([=]() {
-            if (auto mw = qobject_cast<QMainWindow*>(ce->parentWidget())) {
-                auto mbar = mw->menuBar();
-                foreach (QAction *ac, mbar->actions())
-                    if (ac->text() == Label)
-                        return;
-                foreach (QAction *ac, mbar->actions())
-                    if (ac->text() == Before) {
-                        mbar->insertMenu(ac, new QMenu(Label));
-                        return;
-                    }
-                if (Before == "-") {
-                    mbar->addMenu(Label);
-                    return;
-                }
-            }
-            qDebug() << "failed win_insert_menu" << Label << Before;
-        });
-        return TRUE;
+	QString Label = t2w(PL_A1), Before = t2w(PL_A2);
+	ce->exec_func([=]() {
+	    if (auto mw = qobject_cast<QMainWindow*>(ce->parentWidget())) {
+		auto mbar = mw->menuBar();
+		foreach (QAction *ac, mbar->actions())
+		    if (ac->text() == Label)
+			return;
+		foreach (QAction *ac, mbar->actions())
+		    if (ac->text() == Before) {
+			mbar->insertMenu(ac, new QMenu(Label));
+			return;
+		    }
+		if (Before == "-") {
+		    mbar->addMenu(Label);
+		    return;
+		}
+	    }
+	    qDebug() << "failed win_insert_menu" << Label << Before;
+	});
+	return TRUE;
     }
     return FALSE;
 }
@@ -340,84 +340,84 @@ PREDICATE(win_insert_menu, 2) {
 PREDICATE(win_insert_menu_item, 4) {
 
     if (ConsoleEdit *ce = console_by_thread()) {
-        QString Pulldown = t2w(PL_A1), Label, Before = t2w(PL_A3), Goal;
-        QList<QPair<QString, QString>> lab_act;
+	QString Pulldown = t2w(PL_A1), Label, Before = t2w(PL_A3), Goal;
+	QList<QPair<QString, QString>> lab_act;
 
-        if (PL_A2.arity() == 2 /* &&
-            strcmp(PL_A2.name(), "/") == 0 &&
-            PL_A2[2].type() == PL_LIST &&
-            PL_A4.type() == PL_LIST */ )
-        {
-            Label = t2w(PL_A2[1]);
-            PlTerm_tail labels(PL_A2[2]), actions(PL_A4);
-            PlTerm_var label, action;
-            while (labels.next(label) && actions.next(action))
-                lab_act.append(qMakePair(t2w(label), t2w(action)));
-        }
-        else {
-            Label = t2w(PL_A2);
-            Goal = t2w(PL_A4);
-        }
+	if (PL_A2.arity() == 2 /* &&
+	    strcmp(PL_A2.name(), "/") == 0 &&
+	    PL_A2[2].type() == PL_LIST &&
+	    PL_A4.type() == PL_LIST */ )
+	{
+	    Label = t2w(PL_A2[1]);
+	    PlTerm_tail labels(PL_A2[2]), actions(PL_A4);
+	    PlTerm_var label, action;
+	    while (labels.next(label) && actions.next(action))
+		lab_act.append(qMakePair(t2w(label), t2w(action)));
+	}
+	else {
+	    Label = t2w(PL_A2);
+	    Goal = t2w(PL_A4);
+	}
 
-        // this (rude) fix whould go in swipl_devel/library/win_menu.pl
-        //qDebug() << "win_insert_menu_item" << Label;
-        if (Label == "Load &Recent")
-            Label = "&Load Recent";
-        if (Label == "&Reload modified files")
-            Label = "Reload &Modified Files";
-        if (Label == "&Navigator ...")
-            Label = "Na&vigator ...";
+	// this (rude) fix whould go in swipl_devel/library/win_menu.pl
+	//qDebug() << "win_insert_menu_item" << Label;
+	if (Label == "Load &Recent")
+	    Label = "&Load Recent";
+	if (Label == "&Reload modified files")
+	    Label = "Reload &Modified Files";
+	if (Label == "&Navigator ...")
+	    Label = "Na&vigator ...";
 
-        QString ctxtmod = t2w(PlTerm_atom(PlAtom(PL_module_name(PL_context()))));
-        // if (PlCall("context_module", cx)) ctxtmod = t2w(cx); -- same as above: system
-        ctxtmod = "win_menu";
+	QString ctxtmod = t2w(PlTerm_atom(PlAtom(PL_module_name(PL_context()))));
+	// if (PlCall("context_module", cx)) ctxtmod = t2w(cx); -- same as above: system
+	ctxtmod = "win_menu";
 
-        ce->exec_func([=]() {
-            if (auto mw = qobject_cast<pqMainWindow*>(ce->parentWidget())) {
-                foreach (QAction *ac, mw->menuBar()->actions())
-                    if (ac->text() == Pulldown) {
-                        QMenu *mn = ac->menu();
-                        if (!lab_act.isEmpty()) {
-                            foreach (QAction *cm, mn->actions())
-                                if (cm->text() == Label) {
-                                    cm->setMenu(new QMenu(Label));
-                                    foreach (auto p, lab_act)
-                                        mw->addActionPq(ce, cm->menu(), p.first, p.second);
-                                    return;
-                                }
-                            return;
-                        }
-                        else {
-                            if (Label != "--") {
-                                foreach (QAction *bc, mn->actions())
-                                    if (bc->text() == Label) {
-                                        bc->setToolTip(Goal);
-                                        return;
-                                    }
-                            }
-                            if (Before == "-") {
-                                if (Label == "--")
-                                    mn->addSeparator();
-                                else
-                                    mw->add_action(ce, mn, Label, ctxtmod, Goal);
-                                return;
-                            }
-                            foreach (QAction *bc, mn->actions())
-                                if (bc->text() == Before) {
-                                    if (Label == "--")
-                                        mn->insertSeparator(bc);
-                                    else
-                                        mw->add_action(ce, mn, Label, ctxtmod, Goal, bc);
-                                    return;
-                                }
+	ce->exec_func([=]() {
+	    if (auto mw = qobject_cast<pqMainWindow*>(ce->parentWidget())) {
+		foreach (QAction *ac, mw->menuBar()->actions())
+		    if (ac->text() == Pulldown) {
+			QMenu *mn = ac->menu();
+			if (!lab_act.isEmpty()) {
+			    foreach (QAction *cm, mn->actions())
+				if (cm->text() == Label) {
+				    cm->setMenu(new QMenu(Label));
+				    foreach (auto p, lab_act)
+					mw->addActionPq(ce, cm->menu(), p.first, p.second);
+				    return;
+				}
+			    return;
+			}
+			else {
+			    if (Label != "--") {
+				foreach (QAction *bc, mn->actions())
+				    if (bc->text() == Label) {
+					bc->setToolTip(Goal);
+					return;
+				    }
+			    }
+			    if (Before == "-") {
+				if (Label == "--")
+				    mn->addSeparator();
+				else
+				    mw->add_action(ce, mn, Label, ctxtmod, Goal);
+				return;
+			    }
+			    foreach (QAction *bc, mn->actions())
+				if (bc->text() == Before) {
+				    if (Label == "--")
+					mn->insertSeparator(bc);
+				    else
+					mw->add_action(ce, mn, Label, ctxtmod, Goal, bc);
+				    return;
+				}
 
-                            QAction *bc = mw->add_action(ce, mn, Before, ctxtmod, "");
-                            mw->add_action(ce, mn, Label, ctxtmod, Goal, bc);
-                        }
-                    }
-            }
-        });
-        return TRUE;
+			    QAction *bc = mw->add_action(ce, mn, Before, ctxtmod, "");
+			    mw->add_action(ce, mn, Label, ctxtmod, Goal, bc);
+			}
+		    }
+	    }
+	});
+	return TRUE;
     }
     return FALSE;
 }
@@ -429,20 +429,20 @@ PREDICATE0(tty_clear) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
 
-        // loqt does better...
-        // pqConsole::gui_run([&]() { c->tty_clear(); });
+	// loqt does better...
+	// pqConsole::gui_run([&]() { c->tty_clear(); });
 
-        ConsoleEdit::exec_sync s;
-        c->exec_func([&]() {
-            c->tty_clear();
-            s.go();
-        });
-        s.stop();
+	ConsoleEdit::exec_sync s;
+	c->exec_func([&]() {
+	    c->tty_clear();
+	    s.go();
+	});
+	s.stop();
 
-        // buggy - need to sync
-        // c->tty_clear();
+	// buggy - need to sync
+	// c->tty_clear();
 
-        return TRUE;
+	return TRUE;
     }
     return FALSE;
 }
@@ -457,28 +457,28 @@ PREDICATE(win_open_console, 5) {
 
     ConsoleEdit *ce = console_peek_first();
     if (!ce)
-        throw PlException(A("no ConsoleEdit available"));
+	throw PlException(A("no ConsoleEdit available"));
 
     static IOFUNCTIONS rlc_functions = {
-        Swipl_IO::_read_f,
-        Swipl_IO::_write_f,
-        Swipl_IO::_seek_f,
-        Swipl_IO::_close_f,
-        Swipl_IO::_control_f,
-        Swipl_IO::_seek64_f
+	Swipl_IO::_read_f,
+	Swipl_IO::_write_f,
+	Swipl_IO::_seek_f,
+	Swipl_IO::_close_f,
+	Swipl_IO::_control_f,
+	Swipl_IO::_seek64_f
     };
 
     #define STREAM_COMMON (\
-        SIO_TEXT|       /* text-stream */           \
-        SIO_NOCLOSE|    /* do no close on abort */	\
-        SIO_ISATTY|     /* terminal */              \
-        SIO_NOFEOF)     /* reset on end-of-file */
+	SIO_TEXT|       /* text-stream */           \
+	SIO_NOCLOSE|    /* do no close on abort */	\
+	SIO_ISATTY|     /* terminal */              \
+	SIO_NOFEOF)     /* reset on end-of-file */
 
     auto c = new Swipl_IO;
     IOSTREAM
-        *in  = Snew(c,  SIO_INPUT|SIO_LBUF|STREAM_COMMON, &rlc_functions),
-        *out = Snew(c, SIO_OUTPUT|SIO_LBUF|STREAM_COMMON, &rlc_functions),
-        *err = Snew(c, SIO_OUTPUT|SIO_NBUF|STREAM_COMMON, &rlc_functions);
+	*in  = Snew(c,  SIO_INPUT|SIO_LBUF|STREAM_COMMON, &rlc_functions),
+	*out = Snew(c, SIO_OUTPUT|SIO_LBUF|STREAM_COMMON, &rlc_functions),
+	*err = Snew(c, SIO_OUTPUT|SIO_NBUF|STREAM_COMMON, &rlc_functions);
 
     in->position  = &in->posbuf;		/* record position on same stream */
     out->position = &in->posbuf;
@@ -491,12 +491,12 @@ PREDICATE(win_open_console, 5) {
     ce->new_console(c, t2w(PL_A1));
 
     if (!PL_unify_stream(PL_A2.C_, in) ||
-        !PL_unify_stream(PL_A3.C_, out) ||
-        !PL_unify_stream(PL_A4.C_, err)) {
-            Sclose(in);
-            Sclose(out);
-            Sclose(err);
-        return FALSE;
+	!PL_unify_stream(PL_A3.C_, out) ||
+	!PL_unify_stream(PL_A4.C_, err)) {
+	    Sclose(in);
+	    Sclose(out);
+	    Sclose(err);
+	return FALSE;
     }
 
     return TRUE;
@@ -507,10 +507,10 @@ PREDICATE(win_open_console, 5) {
 PREDICATE(rl_add_history, 1) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        auto line = PL_A1.as_wstring();
-        if (!line.empty())
-            c->add_history_line(QString::fromWCharArray(line.c_str()));
-        return TRUE;
+	auto line = PL_A1.as_wstring();
+	if (!line.empty())
+	    c->add_history_line(QString::fromWCharArray(line.c_str()));
+	return TRUE;
     }
     return FALSE;
 }
@@ -527,11 +527,11 @@ PREDICATE(rl_read_init_file, 1) {
 NAMED_PREDICATE("$rl_history", rl_history, 1) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        PlTerm_tail lines(PL_A1);
-        foreach(QString x, c->history_lines())
-            lines.append(PlTerm_atom(W(x)));
-        lines.close();
-        return TRUE;
+	PlTerm_tail lines(PL_A1);
+	foreach(QString x, c->history_lines())
+	    PlCheck(lines.append(PlTerm_atom(W(x))));
+	PlCheck(lines.close());
+	return TRUE;
     }
     return FALSE;
 }
@@ -541,12 +541,12 @@ NAMED_PREDICATE("$rl_history", rl_history, 1) {
 PREDICATE(tty_size, 2) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        QSize sz = c->fontMetrics().size(0, "Q");
-        long Rows = c->height() / sz.height();
-        long Cols = c->width() / sz.width();
-        PlCheck(PL_A1.unify_integer(Rows));
-        PlCheck(PL_A2.unify_integer(Cols));
-        return TRUE;
+	QSize sz = c->fontMetrics().size(0, "Q");
+	long Rows = c->height() / sz.height();
+	long Cols = c->width() / sz.width();
+	PlCheck(PL_A1.unify_integer(Rows));
+	PlCheck(PL_A2.unify_integer(Cols));
+	return TRUE;
     }
     return FALSE;
 }
@@ -572,73 +572,73 @@ PREDICATE(win_message_box, 2) {
     ConsoleEdit* c = console_by_thread();
 
     if (c) {
-        QString Text = t2w(PL_A1);
+	QString Text = t2w(PL_A1);
 
-        QString Title = "swipl-win", Image;
-        PlTerm_var Icon; //QMessageBox::Icon Icon = QMessageBox::NoIcon;
+	QString Title = "swipl-win", Image;
+	PlTerm_var Icon; //QMessageBox::Icon Icon = QMessageBox::NoIcon;
 
-        // scan options
-        float scale = 0;
-        PlTerm_var Option;
-        int min_width = 0;
+	// scan options
+	float scale = 0;
+	PlTerm_var Option;
+	int min_width = 0;
 
-        for (PlTerm_tail t(PL_A2); t.next(Option); )
-            if (Option.arity() == 1) {
-                QString name = Option.name().as_string(EncUTF8).c_str();
-                if (name == "title")
-                    Title = t2w(Option[1]);
-                if (name == "icon")
-                    PlCheck(Icon.unify_term(Option[1]));
-                if (name == "image")
-                    Image = t2w(Option[1]);
-                if (name == "image_scale")
-                    scale = Option[1].as_double();
-                if (name == "min_width")
-                    min_width = Option[1].as_int();
-            }
-            else
-                throw PlException(A(c->tr("option %1 : invalid arity").arg(t2w(Option))));
+	for (PlTerm_tail t(PL_A2); t.next(Option); )
+	    if (Option.arity() == 1) {
+		QString name = Option.name().as_string(EncUTF8).c_str();
+		if (name == "title")
+		    Title = t2w(Option[1]);
+		if (name == "icon")
+		    PlCheck(Icon.unify_term(Option[1]));
+		if (name == "image")
+		    Image = t2w(Option[1]);
+		if (name == "image_scale")
+		    scale = Option[1].as_double();
+		if (name == "min_width")
+		    min_width = Option[1].as_int();
+	    }
+	    else
+		throw PlException(A(c->tr("option %1 : invalid arity").arg(t2w(Option))));
 
-        int rc;
-        QString err;
-        ConsoleEdit::exec_sync s;
+	int rc;
+	QString err;
+	ConsoleEdit::exec_sync s;
 
-        c->exec_func([&]() {
+	c->exec_func([&]() {
 
-            QMessageBox mbox(c);
+	    QMessageBox mbox(c);
 
-            // get icon file, if required
-            QPixmap imfile;
-            if (!Image.isEmpty()) {
-                if (!imfile.load(Image)) {
-                    err = c->tr("icon file %1 not found").arg(Image);
-                    return;
-                }
-                if (scale)
-                    imfile = imfile.scaled(imfile.size() * scale,
-                                           Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-            }
+	    // get icon file, if required
+	    QPixmap imfile;
+	    if (!Image.isEmpty()) {
+		if (!imfile.load(Image)) {
+		    err = c->tr("icon file %1 not found").arg(Image);
+		    return;
+		}
+		if (scale)
+		    imfile = imfile.scaled(imfile.size() * scale,
+					   Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+	    }
 
-            mbox.setText(Text);
-            mbox.setWindowTitle(Title);
-            if (!imfile.isNull())
-                mbox.setIconPixmap(imfile);
+	    mbox.setText(Text);
+	    mbox.setWindowTitle(Title);
+	    if (!imfile.isNull())
+		mbox.setIconPixmap(imfile);
 
-            if (min_width) {
-                auto horizontalSpacer = new QSpacerItem(min_width, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
-                auto layout = qobject_cast<QGridLayout*>(mbox.layout());
-                layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
-            }
+	    if (min_width) {
+		auto horizontalSpacer = new QSpacerItem(min_width, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
+		auto layout = qobject_cast<QGridLayout*>(mbox.layout());
+		layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
+	    }
 
-            rc = mbox.exec() == mbox.Ok;
-            s.go();
-        });
-        s.stop();
+	    rc = mbox.exec() == mbox.Ok;
+	    s.go();
+	});
+	s.stop();
 
-        if (!err.isEmpty())
-            throw PlException(A(err));
+	if (!err.isEmpty())
+	    throw PlException(A(err));
 
-        return rc;
+	return rc;
     }
 
     return FALSE;
@@ -651,8 +651,8 @@ PREDICATE0(interrupt) {
     ConsoleEdit* c = console_by_thread();
     qDebug() << "interrupt" << CVP(c);
     if (c) {
-        c->int_request();
-        return TRUE;
+	c->int_request();
+	return TRUE;
     }
     return FALSE;
 }
@@ -675,15 +675,15 @@ PREDICATE0(interrupt) {
 PREDICATE(console_settings, 1) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        PlFrame fr;
-        PlTerm_var opt;
-        for (PlTerm_tail opts(PL_A1); opts.next(opt); ) {
-            if (opt.arity() == 1)
-              unify(opt.name().as_string(EncUTF8).c_str(), c, opt[1]);
-            else
-                throw PlException(A(c->tr("%1: properties have arity 1").arg(t2w(opt))));
-        }
-        return TRUE;
+	PlFrame fr;
+	PlTerm_var opt;
+	for (PlTerm_tail opts(PL_A1); opts.next(opt); ) {
+	    if (opt.arity() == 1)
+	      unify(opt.name().as_string(EncUTF8).c_str(), c, opt[1]);
+	    else
+		throw PlException(A(c->tr("%1: properties have arity 1").arg(t2w(opt))));
+	}
+	return TRUE;
     }
     return FALSE;
 }
@@ -695,22 +695,22 @@ PREDICATE(console_settings, 1) {
 PREDICATE(getOpenFileName, 4) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        QString Caption = t2w(PL_A1), StartPath, Pattern = t2w(PL_A3), Choice;
-        if (PL_A2.type() == PL_ATOM)
-            StartPath = t2w(PL_A2);
+	QString Caption = t2w(PL_A1), StartPath, Pattern = t2w(PL_A3), Choice;
+	if (PL_A2.type() == PL_ATOM)
+	    StartPath = t2w(PL_A2);
 
-        ConsoleEdit::exec_sync s;
+	ConsoleEdit::exec_sync s;
 
-        c->exec_func([&]() {
-            Choice = QFileDialog::getOpenFileName(c, Caption, StartPath, Pattern);
-            s.go();
-        });
-        s.stop();
+	c->exec_func([&]() {
+	    Choice = QFileDialog::getOpenFileName(c, Caption, StartPath, Pattern);
+	    s.go();
+	});
+	s.stop();
 
-        if (!Choice.isEmpty()) {
-            PlCheck(PL_A4.unify_atom(A(Choice)));
-            return TRUE;
-        }
+	if (!Choice.isEmpty()) {
+	    PlCheck(PL_A4.unify_atom(A(Choice)));
+	    return TRUE;
+	}
     }
     return FALSE;
 }
@@ -722,21 +722,21 @@ PREDICATE(getOpenFileName, 4) {
 PREDICATE(getSaveFileName, 4) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        QString Caption = t2w(PL_A1), StartPath, Pattern = t2w(PL_A3), Choice;
-        if (PL_A2.type() == PL_ATOM)
-            StartPath = t2w(PL_A2);
+	QString Caption = t2w(PL_A1), StartPath, Pattern = t2w(PL_A3), Choice;
+	if (PL_A2.type() == PL_ATOM)
+	    StartPath = t2w(PL_A2);
 
-        ConsoleEdit::exec_sync s;
-        c->exec_func([&]() {
-            Choice = QFileDialog::getSaveFileName(c, Caption, StartPath, Pattern);
-            s.go();
-        });
-        s.stop();
+	ConsoleEdit::exec_sync s;
+	c->exec_func([&]() {
+	    Choice = QFileDialog::getSaveFileName(c, Caption, StartPath, Pattern);
+	    s.go();
+	});
+	s.stop();
 
-        if (!Choice.isEmpty()) {
-            PlCheck(PL_A4.unify_atom(A(Choice)));
-            return TRUE;
-        }
+	if (!Choice.isEmpty()) {
+	    PlCheck(PL_A4.unify_atom(A(Choice)));
+	    return TRUE;
+	}
     }
     return FALSE;
 }
@@ -748,17 +748,17 @@ PREDICATE0(select_font) {
     ConsoleEdit* c = console_by_thread();
     bool ok = false;
     if (c) {
-        ConsoleEdit::exec_sync s;
-        c->exec_func([&]() {
-            Preferences p;
+	ConsoleEdit::exec_sync s;
+	c->exec_func([&]() {
+	    Preferences p;
 	    qDebug() << "Opening font dialog";
-            QFont font = QFontDialog::getFont(&ok, p.console_font, c);
+	    QFont font = QFontDialog::getFont(&ok, p.console_font, c);
 	    qDebug() << "ok = " << ok << "font = " << font;
-            if (ok)
-                c->setFont(p.console_font = font);
-            s.go();
-        });
-        s.stop();
+	    if (ok)
+		c->setFont(p.console_font = font);
+	    s.go();
+	});
+	s.stop();
     }
     return ok;
 }
@@ -770,24 +770,24 @@ PREDICATE0(select_ANSI_term_colors) {
     ConsoleEdit* c = console_by_thread();
     bool ok = false;
     if (c) {
-        ConsoleEdit::exec_sync s;
-        c->exec_func([&]() {
-            Preferences p;
-            QColorDialog d(c);
+	ConsoleEdit::exec_sync s;
+	c->exec_func([&]() {
+	    Preferences p;
+	    QColorDialog d(c);
 	    d.setOption(QColorDialog::ColorDialogOption::DontUseNativeDialog);
-            Q_ASSERT(d.customCount() >= p.ANSI_sequences.size());
-            for (int i = 0; i < p.ANSI_sequences.size(); ++i)
-                d.setCustomColor(i, p.ANSI_sequences[i].rgb());
-            if (d.exec()) {
-                for (int i = 0; i < p.ANSI_sequences.size(); ++i)
-                    p.ANSI_sequences[i] = d.customColor(i);
-                c->repaint();
-                ok = true;
-            }
-            s.go();
-        });
-        s.stop();
-        return ok;
+	    Q_ASSERT(d.customCount() >= p.ANSI_sequences.size());
+	    for (int i = 0; i < p.ANSI_sequences.size(); ++i)
+		d.setCustomColor(i, p.ANSI_sequences[i].rgb());
+	    if (d.exec()) {
+		for (int i = 0; i < p.ANSI_sequences.size(); ++i)
+		    p.ANSI_sequences[i] = d.customColor(i);
+		c->repaint();
+		ok = true;
+	    }
+	    s.go();
+	});
+	s.stop();
+	return ok;
     }
     return FALSE;
 }
@@ -798,12 +798,12 @@ PREDICATE0(select_ANSI_term_colors) {
 PREDICATE0(quit_console) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        // run on foreground
-        c->exec_func([=]() {
-        if (auto mw = find_parent<pqMainWindow>(c))
-            QApplication::postEvent(mw, new QCloseEvent);
-        });
-        return TRUE;
+	// run on foreground
+	c->exec_func([=]() {
+	if (auto mw = find_parent<pqMainWindow>(c))
+	    QApplication::postEvent(mw, new QCloseEvent);
+	});
+	return TRUE;
     }
     return FALSE;
 }
@@ -813,11 +813,11 @@ PREDICATE0(quit_console) {
 PREDICATE0(copy) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        c->exec_func([=](){
-            QApplication::clipboard()->setText(c->textCursor().selectedText());
-            do_events();
-        });
-        return TRUE;
+	c->exec_func([=](){
+	    QApplication::clipboard()->setText(c->textCursor().selectedText());
+	    do_events();
+	});
+	return TRUE;
     }
     return FALSE;
 }
@@ -827,11 +827,11 @@ PREDICATE0(copy) {
 PREDICATE0(paste) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        c->exec_func([=](){
-            c->textCursor().insertText(QApplication::clipboard()->text());
-            do_events();
-        });
-        return TRUE;
+	c->exec_func([=](){
+	    c->textCursor().insertText(QApplication::clipboard()->text());
+	    do_events();
+	});
+	return TRUE;
     }
     return FALSE;
 }
@@ -845,8 +845,8 @@ PREDICATE(win_preference_groups, 1) {
     Preferences p;
     PlTerm_tail l(PL_A1);
     foreach (auto g, p.childGroups())
-        l.append(PlTerm_atom(A(g)));
-    l.close();
+	PlCheck(l.append(PlTerm_atom(A(g))));
+    PlCheck(l.close());
     return TRUE;
 }
 
@@ -856,8 +856,8 @@ PREDICATE(win_preference_keys, 2) {
     Preferences p;
     PlTerm_tail l(PL_A1);
     foreach (auto k, p.childKeys())
-        l.append(PlTerm_atom(A(k)));
-    l.close();
+	PlCheck(l.append(PlTerm_atom(A(k))));
+    PlCheck(l.close());
     return TRUE;
 }
 
@@ -867,12 +867,12 @@ PREDICATE(win_current_preference, 3) {
     Preferences p;
 
     auto g = t2w(PL_A1),
-         k = t2w(PL_A2);
+	 k = t2w(PL_A2);
 
     p.beginGroup(g);
     if (p.contains(k)) {
-        auto x = p.value(k).toString();
-        return PL_A3.unify_term(PlCompound(x.toStdWString()));
+	auto x = p.value(k).toString();
+	return PL_A3.unify_term(PlCompound(x.toStdWString()));
     }
 
     return FALSE;
@@ -884,7 +884,7 @@ PREDICATE(win_set_preference, 3) {
     Preferences p;
 
     auto g = t2w(PL_A1),
-         k = t2w(PL_A2);
+	 k = t2w(PL_A2);
 
     p.beginGroup(g);
     p.setValue(k, serialize(PL_A3));
@@ -896,15 +896,15 @@ PREDICATE(win_set_preference, 3) {
 PREDICATE(win_html_write, 1) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        // run on foreground
-        QString html = t2w(PL_A1);
-        ConsoleEdit::exec_sync s;
-        c->exec_func([&]() {
-            c->html_write(html);
-            s.go();
-        });
-        s.stop();
-        return TRUE;
+	// run on foreground
+	QString html = t2w(PL_A1);
+	ConsoleEdit::exec_sync s;
+	c->exec_func([&]() {
+	    c->html_write(html);
+	    s.go();
+	});
+	s.stop();
+	return TRUE;
     }
     return FALSE;
 }
@@ -915,41 +915,41 @@ PREDICATE(win_window_color, 2) {
 
     ConsoleEdit* c = console_by_thread();
     if (c) {
-        PlTerm rgb = PL_A2;
-        if (rgb.name().as_string(EncUTF8).c_str() == QStringLiteral("rgb")) {
-            int r = rgb[1].as_int(), g = rgb[2].as_int(), b = rgb[3].as_int();
-            QRgb val = qRgb(r, g, b);
-            auto which = t2w(PL_A1);
+	PlTerm rgb = PL_A2;
+	if (rgb.name().as_string(EncUTF8).c_str() == QStringLiteral("rgb")) {
+	    int r = rgb[1].as_int(), g = rgb[2].as_int(), b = rgb[3].as_int();
+	    QRgb val = qRgb(r, g, b);
+	    auto which = t2w(PL_A1);
 
-            ConsoleEdit::exec_sync s;
-            c->exec_func([&]() {
-                auto setcp = [=](QPalette::ColorRole r, int out = -1, int inp = -1) {
-                    auto p = c->palette();
-                    p.setColor(QPalette::Active, r, val);
-                    p.setColor(QPalette::Inactive, r, val);
-                    c->setPalette(p);
-                    if (out >= 0 && inp >= 0) {
-                        Preferences::ANSI_sequences[out] = val;
-                        Preferences::ANSI_sequences[inp] = val;
-                        c->set_colors();
-                    }
-                };
-                if (which == "foreground") {
-                    setcp(QPalette::Text, Preferences::console_out_fore, Preferences::console_inp_fore);
-                } else if (which == "background") {
-                    setcp(QPalette::Base, Preferences::console_out_back, Preferences::console_inp_back);
-                } else if (which == "selection_foreground")
-                    setcp(QPalette::HighlightedText);
-                else if (which == "selection_background")
-                    setcp(QPalette::Highlight);
+	    ConsoleEdit::exec_sync s;
+	    c->exec_func([&]() {
+		auto setcp = [=](QPalette::ColorRole r, int out = -1, int inp = -1) {
+		    auto p = c->palette();
+		    p.setColor(QPalette::Active, r, val);
+		    p.setColor(QPalette::Inactive, r, val);
+		    c->setPalette(p);
+		    if (out >= 0 && inp >= 0) {
+			Preferences::ANSI_sequences[out] = val;
+			Preferences::ANSI_sequences[inp] = val;
+			c->set_colors();
+		    }
+		};
+		if (which == "foreground") {
+		    setcp(QPalette::Text, Preferences::console_out_fore, Preferences::console_inp_fore);
+		} else if (which == "background") {
+		    setcp(QPalette::Base, Preferences::console_out_back, Preferences::console_inp_back);
+		} else if (which == "selection_foreground")
+		    setcp(QPalette::HighlightedText);
+		else if (which == "selection_background")
+		    setcp(QPalette::Highlight);
 
-                s.go();
-            });
-            s.stop();
-            return TRUE;
-        }
-        //throw PlDomainError(err_expected_desc, err_expected_term);
-        //c->repaint();
+		s.go();
+	    });
+	    s.stop();
+	    return TRUE;
+	}
+	//throw PlDomainError(err_expected_desc, err_expected_term);
+	//c->repaint();
     }
     return FALSE;
 }

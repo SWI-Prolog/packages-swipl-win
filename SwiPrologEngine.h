@@ -34,6 +34,7 @@
 #ifndef SWIPROLOGENGINE_H
 #define SWIPROLOGENGINE_H
 
+#include <SWI-Stream.h>
 #include <SWI-cpp2.h>
 
 #include <QMap>

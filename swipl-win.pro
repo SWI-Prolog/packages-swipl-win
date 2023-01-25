@@ -13,9 +13,10 @@
 QT += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+CONFIG += c++11
+
 macx {
     QT_CONFIG -= no-pkg-config
-    CONFIG += c++11
     ICON = swipl.icns
     QMAKE_MACOS_DEPLOYMENT_TARGET = 10.6
     QMAKE_MAC_SDK = macosx10.12
@@ -23,9 +24,6 @@ macx {
 
 TARGET = swipl-win
 TEMPLATE = app
-
-# please, not obsolete compiler
-QMAKE_CXXFLAGS += -std=c++0x
 
 # provide appropriate linking mode for
 # static compilation of pqConsole source files
@@ -59,7 +57,7 @@ unix {
 windows {
     SwiPl = "C:\Program Files\swipl"
     INCLUDEPATH += $$SwiPl\include
-    LIBS += -L$$SwiPl\bin -lswipl
+    LIBS += -L$$SwiPl\bin -llibswipl
 }
 
 mingw {

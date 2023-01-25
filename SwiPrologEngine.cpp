@@ -31,8 +31,6 @@
     POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <SWI-Stream.h>
-#include <SWI-cpp2.h>
 #include "SwiPrologEngine.h"
 #include "PREDICATE.h"
 

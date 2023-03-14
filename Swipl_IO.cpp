@@ -129,8 +129,8 @@ ssize_t Swipl_IO::_read_(char *buf, size_t bufsize) {
                     int rc = PlCall(query.toStdWString().data());
                     qDebug() << "PlCall" << query << rc;
                 }
-                catch(PlException e) {
-                    qDebug() << t2w(e);
+                catch(const PlException& e) {
+                    qDebug() << t2w(e.term()); // TODO: e.what()
                 }
                 query.clear();
             }

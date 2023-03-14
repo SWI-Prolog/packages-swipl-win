@@ -54,7 +54,7 @@ bool swipl_win::event(QEvent *event) {
         SwiPrologEngine::in_thread _it;
         try {
             PlCall("prolog", "file_open_event", PlTermv(PlTerm_atom(name.toStdWString())));
-        } catch(PlException e) {
+        } catch(const PlException& e) {
             qDebug() << CCP(e);
         }
         return true;

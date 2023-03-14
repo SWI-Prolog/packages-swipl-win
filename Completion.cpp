@@ -76,13 +76,13 @@ QString Completion::initialize(int promptPosition, QTextCursor c, QStringList &s
 	    PlTerm_tail l(Completions); // cautiously make an explicit call to close
 	    while (l.next(word))
 		strings.append(t2w(word));
-	    PlCheck(l.close());
+	    PlCheckFail(l.close());
 	}
 
 	c.setPosition(p);
 	rets = t2w(Delete);
     }
-    catch(PlException e) {
+    catch(const PlException& e) {
 	qDebug() << CCP(e);
     }
     catch(...) {
@@ -113,7 +113,7 @@ void Completion::initialize(QStringList &strings) {
 	    for (PlTerm_tail x(l); x.next(v); )
 	      strings.append(v.as_string().c_str());
     }
-    catch(PlException e) {
+    catch(const PlException& e) {
 	qDebug() << CCP(e);
     }
 }
@@ -133,7 +133,7 @@ bool Completion::setup() {
 	    setup_status = available;
 	}
     }
-	catch(PlException e) {
+	catch(const PlException& e) {
 //            qDebug() << CCP(e);
 	}
     }

@@ -136,24 +136,24 @@ static QString unify(const QMetaProperty& p, QObject *o, PlTerm v) {
     case PL_VARIABLE:
 	switch (pt) {
 	case PCLASS::Bool:
-	    PlCheck(v.unify_atom(p.read(o).toBool() ? A("true") : A("false")));
+	    PlCheckFail(v.unify_atom(p.read(o).toBool() ? A("true") : A("false")));
 	    OK;
 	case PCLASS::Int:
 	    if (p.isEnumType()) {
 		Q_ASSERT(!p.isFlagType());  // TBD
 		QMetaEnum e = p.enumerator();
 		if (CCP key = e.valueToKey(p.read(o).toInt())) {
-		    PlCheck(v.unify_atom(A(key)));
+		    PlCheckFail(v.unify_atom(A(key)));
 		    OK;
 		}
 	    }
-	    PlCheck(v.unify_integer(p.read(o).toInt()));
+	    PlCheckFail(v.unify_integer(p.read(o).toInt()));
 	    OK;
 	case PCLASS::UInt:
-	    PlCheck(v.unify_integer(p.read(o).toUInt()));
+	    PlCheckFail(v.unify_integer(p.read(o).toUInt()));
 	    OK;
 	case PCLASS::PSTRING:
-	    PlCheck(v.unify_atom(A(p.read(o).toString())));
+	    PlCheckFail(v.unify_atom(A(p.read(o).toString())));
 	    OK;
 	default:
 	    break;
@@ -228,7 +228,7 @@ PREDICATE(window_title, 2) {
     if (c) {
 	QWidget *w = c->parentWidget();
 	if (qobject_cast<QMainWindow*>(w)) {
-	    PlCheck(PL_A1.unify_atom(A(w->windowTitle())));
+	    PlCheckFail(PL_A1.unify_atom(A(w->windowTitle())));
 	    w->setWindowTitle(t2w(PL_A2));
 	    return TRUE;
 	}
@@ -257,7 +257,7 @@ PREDICATE(win_window_pos, 1) {
     L options(PL_A1);
     typedef QPair<int, QString> O;
     while (options.next(opt)) {
-	O o = O(opt.arity(), opt.name().as_string(EncUTF8).c_str());
+	O o = O(opt.arity(), opt.name().as_string(PlEncoding::UTF8).c_str());
 	if (o == O(2, "size")) {
 	    long W = opt[1].as_long(), H = opt[2].as_long();
 	    QSize sz = c->fontMetrics().size(0, "Q");
@@ -275,7 +275,7 @@ PREDICATE(win_window_pos, 1) {
 	    continue;
 	}
 	if (o == O(1, "show")) {
-	  bool y = QString(opt[1].name().as_string(EncUTF8).c_str()) == "true";
+	  bool y = QString(opt[1].name().as_string(PlEncoding::UTF8).c_str()) == "true";
 	    if (y)
 		w->show();
 	    else
@@ -529,8 +529,8 @@ NAMED_PREDICATE("$rl_history", rl_history, 1) {
     if (c) {
 	PlTerm_tail lines(PL_A1);
 	foreach(QString x, c->history_lines())
-	    PlCheck(lines.append(PlTerm_atom(W(x))));
-	PlCheck(lines.close());
+	    PlCheckFail(lines.append(PlTerm_atom(W(x))));
+	PlCheckFail(lines.close());
 	return TRUE;
     }
     return FALSE;
@@ -544,8 +544,8 @@ PREDICATE(tty_size, 2) {
 	QSize sz = c->fontMetrics().size(0, "Q");
 	long Rows = c->height() / sz.height();
 	long Cols = c->width() / sz.width();
-	PlCheck(PL_A1.unify_integer(Rows));
-	PlCheck(PL_A2.unify_integer(Cols));
+	PlCheckFail(PL_A1.unify_integer(Rows));
+	PlCheckFail(PL_A2.unify_integer(Cols));
 	return TRUE;
     }
     return FALSE;
@@ -584,11 +584,11 @@ PREDICATE(win_message_box, 2) {
 
 	for (PlTerm_tail t(PL_A2); t.next(Option); )
 	    if (Option.arity() == 1) {
-		QString name = Option.name().as_string(EncUTF8).c_str();
+		QString name = Option.name().as_string(PlEncoding::UTF8).c_str();
 		if (name == "title")
 		    Title = t2w(Option[1]);
 		if (name == "icon")
-		    PlCheck(Icon.unify_term(Option[1]));
+		    PlCheckFail(Icon.unify_term(Option[1]));
 		if (name == "image")
 		    Image = t2w(Option[1]);
 		if (name == "image_scale")
@@ -679,7 +679,7 @@ PREDICATE(console_settings, 1) {
 	PlTerm_var opt;
 	for (PlTerm_tail opts(PL_A1); opts.next(opt); ) {
 	    if (opt.arity() == 1)
-	      unify(opt.name().as_string(EncUTF8).c_str(), c, opt[1]);
+	      unify(opt.name().as_string(PlEncoding::UTF8).c_str(), c, opt[1]);
 	    else
 		throw PlException(A(c->tr("%1: properties have arity 1").arg(t2w(opt))));
 	}
@@ -708,7 +708,7 @@ PREDICATE(getOpenFileName, 4) {
 	s.stop();
 
 	if (!Choice.isEmpty()) {
-	    PlCheck(PL_A4.unify_atom(A(Choice)));
+	    PlCheckFail(PL_A4.unify_atom(A(Choice)));
 	    return TRUE;
 	}
     }
@@ -734,7 +734,7 @@ PREDICATE(getSaveFileName, 4) {
 	s.stop();
 
 	if (!Choice.isEmpty()) {
-	    PlCheck(PL_A4.unify_atom(A(Choice)));
+	    PlCheckFail(PL_A4.unify_atom(A(Choice)));
 	    return TRUE;
 	}
     }
@@ -845,8 +845,8 @@ PREDICATE(win_preference_groups, 1) {
     Preferences p;
     PlTerm_tail l(PL_A1);
     foreach (auto g, p.childGroups())
-	PlCheck(l.append(PlTerm_atom(A(g))));
-    PlCheck(l.close());
+	PlCheckFail(l.append(PlTerm_atom(A(g))));
+    PlCheckFail(l.close());
     return TRUE;
 }
 
@@ -856,8 +856,8 @@ PREDICATE(win_preference_keys, 2) {
     Preferences p;
     PlTerm_tail l(PL_A1);
     foreach (auto k, p.childKeys())
-	PlCheck(l.append(PlTerm_atom(A(k))));
-    PlCheck(l.close());
+	PlCheckFail(l.append(PlTerm_atom(A(k))));
+    PlCheckFail(l.close());
     return TRUE;
 }
 
@@ -916,7 +916,7 @@ PREDICATE(win_window_color, 2) {
     ConsoleEdit* c = console_by_thread();
     if (c) {
 	PlTerm rgb = PL_A2;
-	if (rgb.name().as_string(EncUTF8).c_str() == QStringLiteral("rgb")) {
+	if (rgb.name().as_string(PlEncoding::UTF8).c_str() == QStringLiteral("rgb")) {
 	    int r = rgb[1].as_int(), g = rgb[2].as_int(), b = rgb[3].as_int();
 	    QRgb val = qRgb(r, g, b);
 	    auto which = t2w(PL_A1);

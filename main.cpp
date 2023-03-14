@@ -38,6 +38,8 @@
 #include <QTextStream>
 #include "swipl_win.h"
 
+#include <SWI-cpp2.cpp>
+
 static FILE *logfile;
 static bool  nolog = true;
 

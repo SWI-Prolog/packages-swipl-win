@@ -139,7 +139,7 @@ void SwiPrologEngine::serve_query(query p) {
     QString n = p.name, t = p.text;
     try {
 	if (n.isEmpty()) {
-	    PlQuery q("call", PlTermv(PlCompound(std::string(t.toUtf8()), EncUTF8)));
+	    PlQuery q("call", PlTermv(PlCompound(std::string(t.toUtf8()), PlEncoding::UTF8)));
 	    //PlQuery q("call", PlTermv(PlCompound(t.toStdWString().data())));
 	    int occurrences = 0;
 	    while (q.next_solution())
@@ -147,7 +147,7 @@ void SwiPrologEngine::serve_query(query p) {
 	    emit query_complete(t, occurrences);
 	}
 	else {
-	    PlQuery q(A(n).as_string(), "call", PlTermv(PlCompound(std::string(t.toUtf8()), EncUTF8)));
+	    PlQuery q(A(n).as_string(), "call", PlTermv(PlCompound(std::string(t.toUtf8()), PlEncoding::UTF8)));
 	    //PlQuery q(A(n), "call", PlTermv(PlCompound(t.toStdWString().data())));
 	    int occurrences = 0;
 	    while (q.next_solution())
@@ -155,7 +155,7 @@ void SwiPrologEngine::serve_query(query p) {
 	    emit query_complete(t, occurrences);
 	}
     }
-    catch(PlException ex) {
+    catch(const PlException& ex) {
 	qDebug() << t << CCP(ex);
 	emit query_exception(n, CCP(ex));
     }
@@ -331,16 +331,16 @@ bool SwiPrologEngine::in_thread::named_load(QString n, QString t, bool silent) {
 	if (    PlCall("atom_codes", PlTermv(PlTerm_atom(A(t)), cs)) &&
 		PlCall("open_chars_stream", PlTermv(cs, s))) {
 	    PlTerm_tail l(opts);
-	    PlCheck(l.append(PlCompound("stream", PlTermv(s))));
+	    PlCheckFail(l.append(PlCompound("stream", PlTermv(s))));
 	    if (silent)
-		PlCheck(l.append(PlCompound("silent", PlTermv(A("true")))));
-	    PlCheck(l.close());
+		PlCheckFail(l.append(PlCompound("silent", PlTermv(A("true")))));
+	    PlCheckFail(l.close());
 	    bool rc = PlCall("load_files", PlTermv(PlTerm_atom(A(n)), opts));
 	    PlCall("close", PlTermv(s));
 	    return rc;
 	}
     }
-    catch(PlException ex) {
+    catch(const PlException& ex) {
 	qDebug() << CCP(ex);
     }
     return false;

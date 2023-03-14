@@ -812,7 +812,7 @@ void ConsoleEdit::onConsoleMenuActionMap(QString action) {
                         PlCall(action.toStdWString().data());
                         for (int c = 0; c < 100; c++)
                             do_events(10);
-                    } catch(PlException e) {
+                    } catch(const PlException& e) {
                         qDebug() << CCP(e);
                     }
                     target->thids.removeLast();

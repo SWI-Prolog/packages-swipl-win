@@ -490,9 +490,9 @@ PREDICATE(win_open_console, 5) {
 
     ce->new_console(c, t2w(PL_A1));
 
-    if (!PL_unify_stream(PL_A2.C_, in) ||
-	!PL_unify_stream(PL_A3.C_, out) ||
-	!PL_unify_stream(PL_A4.C_, err)) {
+    if (!PL_unify_stream(PL_A2.unwrap(), in) ||
+	!PL_unify_stream(PL_A3.unwrap(), out) ||
+	!PL_unify_stream(PL_A4.unwrap(), err)) {
 	    Sclose(in);
 	    Sclose(out);
 	    Sclose(err);

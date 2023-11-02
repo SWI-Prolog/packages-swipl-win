@@ -38,6 +38,10 @@
 #include <QTextStream>
 #include "swipl_win.h"
 
+#undef _SWI_CPP2_CPP_SEPARATE
+#undef _SWI_CPP2_CPP_inline
+#define _SWI_CPP2_CPP_SEPARATE
+#define _SWI_CPP2_CPP_inline
 #include <SWI-cpp2.cpp>
 
 static FILE *logfile;

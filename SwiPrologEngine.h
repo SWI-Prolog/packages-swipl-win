@@ -34,6 +34,8 @@
 #ifndef SWIPROLOGENGINE_H
 #define SWIPROLOGENGINE_H
 
+#define _SWI_CPP2_CPP_SEPARATE
+
 #include <SWI-Stream.h>
 #include <SWI-cpp2.h>
 

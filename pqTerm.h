@@ -34,6 +34,8 @@
 #ifndef PQTERM_H
 #define PQTERM_H
 
+#define _SWI_CPP2_CPP_SEPARATE
+
 #include "pqConsole_global.h"
 #include <SWI-cpp2.h>
 #include <QVariant>

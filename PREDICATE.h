@@ -34,6 +34,8 @@
 #ifndef PREDICATE_H
 #define PREDICATE_H
 
+#define _SWI_CPP2_CPP_SEPARATE
+
 #include <SWI-cpp2.h>
 
 #ifndef NO_SHORTEN_INTERFACE

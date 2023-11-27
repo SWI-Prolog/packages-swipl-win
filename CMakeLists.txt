@@ -91,7 +91,7 @@ if(BUILD_MACOS_BUNDLE)
 	  DESTINATION ${SWIPL_INSTALL_RESOURCES})
 endif()
 
-if(NOT WIN32 AND NOT BUILD_MACOS_BUNDLE)
+if(SWIPL_INSTALL_AS_LINK)
 # Create symbolic link from public installation dir to executables
 install(DIRECTORY DESTINATION bin)
 ilink(${CMAKE_INSTALL_PREFIX}/${SWIPL_INSTALL_ARCH_EXE}/swipl-win

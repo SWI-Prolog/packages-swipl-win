@@ -224,6 +224,10 @@ void SwiPrologEngine::run() {
     Soutput->flags &= ~SIO_FILE;
     Serror->flags  &= ~SIO_FILE;
 
+    Sinput->fileno  = -1;
+    Soutput->fileno = -1;
+    Serror->fileno  = -1;
+
     PL_set_prolog_flag("console_menu", PL_BOOL|FF_READONLY, TRUE);
     PL_set_prolog_flag("console_menu_version", PL_ATOM|FF_READONLY, "qt");
     PL_set_prolog_flag("xpce_threaded", PL_BOOL, TRUE);

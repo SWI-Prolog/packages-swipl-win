@@ -21,7 +21,7 @@ set(PLWIN_RESOURCES
     swipl-win.qrc)
 
 if(Qt5Widgets_FOUND)
-  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD 17) # Required by SWI-cpp2.h (packages/cpp)
   qt5_add_resources(SWIPL_RES_SOURCES ${PLWIN_RESOURCES})
   set(QT_WIDGETS Qt5::Widgets)
 else()

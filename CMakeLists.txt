@@ -94,8 +94,8 @@ endif()
 if(SWIPL_INSTALL_AS_LINK)
 # Create symbolic link from public installation dir to executables
 install(DIRECTORY DESTINATION bin)
-ilink(${CMAKE_INSTALL_PREFIX}/${SWIPL_INSTALL_ARCH_EXE}/swipl-win
-      ${CMAKE_INSTALL_PREFIX}/bin/swipl-win)
+ilink(/${SWIPL_INSTALL_ARCH_EXE}/swipl-win
+      /bin/swipl-win)
 endif()
 
 endif() # Qt5Widgets

@@ -21,4 +21,4 @@ Features
  - XPCE ready, allows reuse of current IDE components
 
 author:  Carlo Capelli - Brescia 2013
-licence: LGPL v2.1
+licence: BSD-2

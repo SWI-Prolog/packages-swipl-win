@@ -53,6 +53,7 @@
 #include "ParenMatching.h"
 
 #include <QElapsedTimer>
+#include <QShortcut>
 
 class Swipl_IO;
 
@@ -245,6 +246,9 @@ protected:
 
     /** relax selection check requirement */
     QElapsedTimer sel_check_timing;
+
+protected:
+    QShortcut *pasteQuoted = nullptr;
 
 protected:
 

@@ -57,6 +57,7 @@
 #include <QMainWindow>
 #include <QApplication>
 #include <QStringListModel>
+#include <QClipboard>
 
 #include "ansi_esc_seq.h"
 
@@ -173,6 +174,37 @@ void ConsoleEdit::setup() {
 
     // so far,
     connect(this, SIGNAL(selectionChanged()), this, SLOT(selectionChanged()));
+
+    pasteQuoted = new QShortcut(QKeySequence("Ctrl+Y"), this);
+    connect(pasteQuoted, &QShortcut::activated, this, [&]() {
+        exec_func([=]() {
+            QTextCursor c = textCursor();
+
+            QChar stringDelim = QChar::Null;
+            if (c.movePosition(c.Left, c.KeepAnchor)) {
+                auto s = c.selectedText();
+                auto d = s[0];
+                if (d ==  '\'' || d == '`' || d == '"')
+                    stringDelim = d;
+                c.movePosition(c.Right);
+            }
+
+            auto text = QApplication::clipboard()->text();
+            text.replace('\\', "\\\\");
+
+	    if ( stringDelim == QChar::Null ) {
+	      stringDelim = '\'';
+	      text.replace(stringDelim, QString('\\')+QString(stringDelim));
+	      text = stringDelim + text;
+	    } else {
+	      text.replace(stringDelim, QString('\\')+QString(stringDelim));
+	    }
+	    text += stringDelim;
+
+            c.insertText(text);
+            do_events();
+        });
+    });
 }
 
 /** set presentation attributes
@@ -323,6 +355,13 @@ void ConsoleEdit::keyPressEvent(QKeyEvent *event) {
             setTextCursor(c);
             ret = true;
             status = eof;
+        }
+        break;
+
+    case Key_Y:
+        if (ctrl) {
+            emit pasteQuoted->activated();
+            return;
         }
         break;
 

@@ -179,18 +179,24 @@ void ConsoleEdit::setup() {
     connect(pasteQuoted, &QShortcut::activated, this, [&]() {
         exec_func([=]() {
             QTextCursor c = textCursor();
-            QChar stringDelim = '\'';
+
+            QChar stringDelim = QChar::Null;
             if (c.movePosition(c.Left, c.KeepAnchor)) {
                 auto s = c.selectedText();
                 auto d = s[0];
-                if (d == '`' || d == '"')
+                if (d ==  '\'' || d == '`' || d == '"')
                     stringDelim = d;
                 c.movePosition(c.Right);
             }
 
             auto text = QApplication::clipboard()->text();
             text.replace('\\', "\\\\");
-            text.replace(stringDelim, QString(stringDelim)+QString(stringDelim));
+
+            if (stringDelim != QChar::Null) {
+                text.replace(stringDelim, QString('\\')+QString(stringDelim));
+                text += stringDelim;
+            }
+
             c.insertText(text);
             do_events();
         });

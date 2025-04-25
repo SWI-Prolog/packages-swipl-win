@@ -612,7 +612,6 @@ PREDICATE(win_message_box, 2) {
 	    if (!Image.isEmpty()) {
 		if (!imfile.load(Image)) {
 		    err = c->tr("%1").arg(Image);
-		    return;
 		}
 		if (scale)
 		    imfile = imfile.scaled(imfile.size() * scale,

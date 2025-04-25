@@ -587,17 +587,17 @@ PREDICATE(win_message_box, 2) {
 		QString name = Option.name().as_string(PlEncoding::UTF8).c_str();
 		if (name == "title")
 		    Title = t2w(Option[1]);
-		if (name == "icon")
+		else if (name == "icon")
 		    PlCheckFail(Icon.unify_term(Option[1]));
-		if (name == "image")
+		else if (name == "image")
 		    Image = t2w(Option[1]);
-		if (name == "image_scale")
+		else if (name == "image_scale")
 		    scale = Option[1].as_double();
-		if (name == "min_width")
+		else if (name == "min_width")
 		    min_width = Option[1].as_int();
 	    }
 	    else
-		throw PlException(A(c->tr("option %1 : invalid arity").arg(t2w(Option))));
+		throw PlTypeError("option", t);
 
 	int rc;
 	QString err;
@@ -611,7 +611,7 @@ PREDICATE(win_message_box, 2) {
 	    QPixmap imfile;
 	    if (!Image.isEmpty()) {
 		if (!imfile.load(Image)) {
-		    err = c->tr("icon file %1 not found").arg(Image);
+		    err = c->tr("%1").arg(Image);
 		    return;
 		}
 		if (scale)
@@ -636,7 +636,7 @@ PREDICATE(win_message_box, 2) {
 	s.stop();
 
 	if (!err.isEmpty())
-	    throw PlException(A(err));
+	    throw PlExistenceError("icon_file", PlTerm_atom(A(err)));
 
 	return rc;
     }
